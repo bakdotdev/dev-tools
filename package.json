@@ -1,0 +1,66 @@
+{
+  "name": "@bakdotdev/dev-tools",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Click-to-source development tool for React. Inspect elements, open source files in your editor, or copy LLM-friendly snippets.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bakdotdev/dev-tools.git"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./babel-plugin": {
+      "types": "./dist/babel-jsx/index.d.ts",
+      "import": "./dist/babel-jsx/index.js"
+    },
+    "./webpack-loader": {
+      "types": "./dist/webpack-loader.d.ts",
+      "import": "./dist/webpack-loader.js",
+      "require": "./dist/webpack-loader.cjs"
+    },
+    "./stub": {
+      "types": "./dist/stub.d.ts",
+      "import": "./dist/stub.js",
+      "default": "./dist/stub.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "tsc --noEmit --watch",
+    "prebuild": "rm -rf dist",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/parser": "^7.24.0",
+    "@babel/preset-typescript": "^7.24.0"
+  },
+  "devDependencies": {
+    "@babel/traverse": "^7.24.0",
+    "@types/babel__core": "^7.20.5",
+    "@types/babel__traverse": "^7.20.5",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  }
+}

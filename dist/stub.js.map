@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/stub.ts"],
+  "sourcesContent": ["/**\n * Production stub - exports no-op components\n * Used when DEV env variable is not set\n */\n\nimport type { ReactNode } from \"react\";\n\nexport const ClickToSource = () => null;\nexport type ClickToSourceProps = Record<string, unknown>;\n\nexport const LayoutDebugOverlay = () => null;\n\nexport const DevToolsProvider = ({ children }: { children: ReactNode }) => children;\nexport const useDevTools = () => ({});\nexport const useDebug = () => ({ log: () => {}, warn: () => {}, error: () => {} });\nexport const useDomain = () => null;\n\nexport type DevToolsProviderProps = { children: ReactNode };\nexport type Domain = string;\nexport type AppName = string;\n"],
+  "mappings": ";AAOO,IAAM,gBAAgB,MAAM;AAG5B,IAAM,qBAAqB,MAAM;AAEjC,IAAM,mBAAmB,CAAC,EAAE,SAAS,MAA+B;AACpE,IAAM,cAAc,OAAO,CAAC;AAC5B,IAAM,WAAW,OAAO,EAAE,KAAK,MAAM;AAAC,GAAG,MAAM,MAAM;AAAC,GAAG,OAAO,MAAM;AAAC,EAAE;AACzE,IAAM,YAAY,MAAM;",
+  "names": []
+}

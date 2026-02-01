@@ -1,0 +1,10 @@
+export const ClickToSource: () => null;
+export type ClickToSourceProps = Record<string, unknown>;
+export const DevToolsProvider: (props: { children: any }) => any;
+export const useDevTools: () => Record<string, unknown>;
+export const useDebug: () => Record<string, () => void>;
+export const useDomain: () => null;
+export type DevToolsProviderProps = { children: any };
+export type Domain = string;
+export type AppName = string;
+export const LayoutDebugOverlay: () => null;

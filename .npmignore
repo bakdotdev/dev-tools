@@ -1,0 +1,4 @@
+# Only ignore node_modules and build cache
+node_modules
+.turbo
+*.tsbuildinfo
