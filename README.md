@@ -99,7 +99,7 @@ The `source` attribute contains `file:line:column`. This format works across all
 
 ## Other Frameworks
 
-### Next.js
+### Next.js (Turbopack)
 
 ```ts
 // next.config.ts
@@ -108,7 +108,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   turbopack: {
     rules: {
-      "**/*.{tsx,jsx}": {
+      "*.tsx": {
+        loaders: [
+          {
+            loader: "@bakdotdev/dev-tools/webpack-loader",
+            options: { env: "development" },
+          },
+        ],
+      },
+      "*.jsx": {
         loaders: [
           {
             loader: "@bakdotdev/dev-tools/webpack-loader",
@@ -123,7 +131,27 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 ```
 
-For Webpack (non-Turbopack):
+Add the React component to your root layout:
+
+```tsx
+// app/layout.tsx
+import { ClickToSource } from "@bakdotdev/dev-tools/react";
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        {children}
+        <ClickToSource editorProtocol="vscode" />
+      </body>
+    </html>
+  );
+}
+```
+
+### Next.js (Webpack)
+
+For Next.js without Turbopack:
 
 ```js
 // next.config.js
@@ -133,7 +161,12 @@ module.exports = {
       config.module.rules.push({
         test: /\.(tsx|jsx)$/,
         exclude: /node_modules/,
-        use: ["@bakdotdev/dev-tools/webpack-loader"],
+        use: [
+          {
+            loader: "@bakdotdev/dev-tools/webpack-loader",
+            options: { env: "development" },
+          },
+        ],
       });
     }
     return config;

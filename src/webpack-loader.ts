@@ -1,4 +1,5 @@
 import { transformSync } from "@babel/core";
+import presetTypescript from "@babel/preset-typescript";
 import locatorPlugin from "./babel-jsx/index.js";
 
 interface LocatorLoaderOptions {
@@ -6,55 +7,46 @@ interface LocatorLoaderOptions {
   ignoreComponentNames?: string[];
 }
 
-interface SourceMap {
-  version: number;
-  sources: string[];
-  mappings: string;
-  file?: string;
-  sourceRoot?: string;
-  sourcesContent?: string[];
-  names?: string[];
-}
-
 interface LoaderContext<T = Record<string, unknown>> {
-  async(): (err: Error | null, content?: string, sourceMap?: SourceMap) => void;
   getOptions(): T;
   resourcePath: string;
 }
 
 /**
- * Webpack loader for @locator/babel-jsx plugin
+ * Webpack/Turbopack loader for @bakdotdev/dev-tools babel-jsx plugin
  *
  * This loader applies the LocatorJS babel transformation to JSX/TSX files,
- * enabling component location tracking for projects using SWC or Turbopack
- * where direct babel plugin usage is not possible.
+ * enabling component location tracking for click-to-source functionality.
  *
- * Always uses path-based data attributes (data-locatorjs) for React Server
- * Component compatibility, working without requiring window.__LOCATOR_DATA__.
+ * Works with both Webpack and Turbopack (Next.js).
  *
  * @example
  * ```js
- * // next.config.js
+ * // next.config.js (Turbopack)
  * module.exports = {
- *   webpack: (config) => {
- *     config.module.rules.push({
- *       test: /\.(tsx|ts|jsx|js)$/,
- *       exclude: /node_modules/,
- *       use: [{
- *         loader: '@locator/webpack-loader',
- *         options: { env: 'development' }
- *       }]
- *     });
- *     return config;
- *   }
+ *   turbopack: {
+ *     rules: {
+ *       '*.tsx': {
+ *         loaders: [{
+ *           loader: '@bakdotdev/dev-tools/webpack-loader',
+ *           options: { env: 'development' }
+ *         }],
+ *       },
+ *       '*.jsx': {
+ *         loaders: [{
+ *           loader: '@bakdotdev/dev-tools/webpack-loader',
+ *           options: { env: 'development' }
+ *         }],
+ *       },
+ *     },
+ *   },
  * };
  * ```
  */
 function locatorLoader(
   this: LoaderContext<LocatorLoaderOptions>,
   source: string
-): void {
-  const callback = this.async();
+): string {
   const filePath = this.resourcePath;
 
   // Debug: log that loader is being called (set DEBUG_LOCATOR=1 to enable)
@@ -64,8 +56,7 @@ function locatorLoader(
 
   // Skip node_modules and middleware files by default
   if (filePath.includes("node_modules") || filePath.includes("middleware.")) {
-    callback(null, source);
-    return;
+    return source;
   }
 
   const options = this.getOptions();
@@ -73,14 +64,15 @@ function locatorLoader(
   try {
     const result = transformSync(source, {
       filename: filePath,
-      sourceMaps: true,
+      sourceMaps: false,
       sourceFileName: filePath,
       babelrc: false,
       configFile: false,
-      // Use TypeScript preset to properly parse TS/TSX files
+      // Use TypeScript preset with direct import (not string name)
+      // This ensures the preset is bundled and doesn't require runtime resolution
       presets: [
         [
-          "@babel/preset-typescript",
+          presetTypescript,
           {
             isTSX: true,
             allExtensions: true,
@@ -88,26 +80,24 @@ function locatorLoader(
           },
         ],
       ],
-      // Apply the locator plugin with path-based data attributes for server components
+      // Apply the locator plugin with path-based data attributes
       plugins: [[locatorPlugin, { ...options, dataAttribute: "path" }]],
-      // Preserve the original code structure
       retainLines: false,
       compact: false,
     });
 
     if (!result || !result.code) {
-      callback(null, source);
-      return;
+      return source;
     }
 
-    callback(null, result.code, result.map || undefined);
+    return result.code;
   } catch (error) {
     // If transformation fails, return original source and log warning
     console.warn(
       `[@bakdotdev/dev-tools/webpack-loader] Failed to transform ${filePath}:`,
       error instanceof Error ? error.message : String(error)
     );
-    callback(null, source);
+    return source;
   }
 }
 

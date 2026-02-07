@@ -77,6 +77,7 @@ await esbuild.build({
 console.log("Built webpack-loader (ESM)");
 
 // Build webpack-loader (CJS) for Turbopack compatibility
+// Bundle ALL dependencies including babel to avoid resolution issues
 await esbuild.build({
   entryPoints: [join(rootDir, "src/webpack-loader.ts")],
   outfile: join(rootDir, "dist/webpack-loader.cjs"),
@@ -85,7 +86,7 @@ await esbuild.build({
   platform: "node",
   target: "node18",
   sourcemap: true,
-  external: ["@babel/core", "@babel/preset-typescript"],
+  // No external - bundle everything for maximum compatibility
 });
 
 console.log("Built webpack-loader (CJS)");
