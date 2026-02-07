@@ -258,6 +258,11 @@ if (isOverlayActive()) {
 - Vite 5+ or webpack-compatible bundler
 - React 18+, Vue 3+, or Angular 17+
 
+## Follow for more stuff!
+
+- [X / Twitter](https://x.com/bakdotdev)
+- [LinkedIn](https://www.linkedin.com/in/erichquist/)
+
 ## License
 
 MIT
