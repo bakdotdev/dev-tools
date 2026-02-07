@@ -10,7 +10,7 @@ Click-to-source development tool for React, Vue, and Angular. Inspect any elemen
 - **Click-to-source**: Ctrl+Click any element to open its source file in your editor
 - **LLM snippets**: Cmd+Click to copy formatted code snippets for AI assistants
 - **Parent navigation**: Hold Alt to target parent components instead
-- **Multi-framework**: React, Vue 3, Angular 17+, Next.js, Nuxt 3
+- **Multi-framework**: React, Vue 3, Angular 17+, TanStack Start, Next.js, Nuxt 3
 - **Multi-editor**: VS Code, Cursor, Zed
 
 ## Quick Start
@@ -144,6 +144,29 @@ export default defineConfig({
 });
 ```
 
+### TanStack Start
+
+```ts
+// app.config.ts
+import { defineConfig } from "@tanstack/start/config";
+import { devToolsPlugin } from "@bakdotdev/dev-tools/vite-plugin";
+
+export default defineConfig({
+  vite: {
+    plugins: [devToolsPlugin()],
+  },
+});
+```
+
+Then initialize in your client entry:
+
+```ts
+// app/client.tsx
+import { initClickToSource } from "@bakdotdev/dev-tools";
+
+initClickToSource({ editorProtocol: "zed" });
+```
+
 ### Next.js (Turbopack)
 
 ```ts
@@ -258,7 +281,7 @@ if (isOverlayActive()) {
 
 ## Requirements
 
-- React 18+, Vue 3+, or Angular 17+
+- React 18+, Vue 3+, Angular 17+, or TanStack Start 1.0+
 - Vite 5+ or webpack-compatible bundler
 - Node.js 18+
 
