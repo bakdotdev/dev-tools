@@ -1,27 +1,27 @@
 import { transformSync } from "@babel/core";
+import presetTypescript from "@babel/preset-typescript";
 import locatorPlugin from "./babel-jsx/index.js";
 function locatorLoader(source) {
-  const callback = this.async();
   const filePath = this.resourcePath;
   if (process.env.DEBUG_LOCATOR) {
     console.log(`[LocatorLoader] Processing: ${filePath}`);
   }
   if (filePath.includes("node_modules") || filePath.includes("middleware.")) {
-    callback(null, source);
-    return;
+    return source;
   }
   const options = this.getOptions();
   try {
     const result = transformSync(source, {
       filename: filePath,
-      sourceMaps: true,
+      sourceMaps: false,
       sourceFileName: filePath,
       babelrc: false,
       configFile: false,
-      // Use TypeScript preset to properly parse TS/TSX files
+      // Use TypeScript preset with direct import (not string name)
+      // This ensures the preset is bundled and doesn't require runtime resolution
       presets: [
         [
-          "@babel/preset-typescript",
+          presetTypescript,
           {
             isTSX: true,
             allExtensions: true,
@@ -29,23 +29,21 @@ function locatorLoader(source) {
           }
         ]
       ],
-      // Apply the locator plugin with path-based data attributes for server components
+      // Apply the locator plugin with path-based data attributes
       plugins: [[locatorPlugin, { ...options, dataAttribute: "path" }]],
-      // Preserve the original code structure
       retainLines: false,
       compact: false
     });
     if (!result || !result.code) {
-      callback(null, source);
-      return;
+      return source;
     }
-    callback(null, result.code, result.map || void 0);
+    return result.code;
   } catch (error) {
     console.warn(
       `[@bakdotdev/dev-tools/webpack-loader] Failed to transform ${filePath}:`,
       error instanceof Error ? error.message : String(error)
     );
-    callback(null, source);
+    return source;
   }
 }
 var webpack_loader_default = locatorLoader;
