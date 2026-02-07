@@ -85,7 +85,7 @@ export class ClickToSourceOverlay {
   private boundBlur: () => void;
 
   constructor(options: OverlayOptions = {}) {
-    this.editorProtocol = options.editorProtocol ?? "cursor";
+    this.editorProtocol = options.editorProtocol ?? "vscode";
     this.onActivate = options.onActivate;
     this.onDeactivate = options.onDeactivate;
 

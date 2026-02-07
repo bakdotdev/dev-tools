@@ -42,7 +42,7 @@ export default defineConfig({
 // main.tsx
 import { initClickToSource } from "@bakdotdev/dev-tools";
 
-initClickToSource({ editorProtocol: "cursor" }); // or "vscode", "zed"
+initClickToSource(); // uses "vscode" by default, or "cursor", "zed"
 ```
 
 Or use the React component:
@@ -75,8 +75,8 @@ The overlay displays a toggle switch at the bottom to enable/disable visual high
 
 | Editor | Protocol |
 |--------|----------|
-| Cursor | `"cursor"` (default) |
-| VS Code | `"vscode"` |
+| VS Code | `"vscode"` (default) |
+| Cursor | `"cursor"` |
 | Zed | `"zed"` |
 
 ## Other Frameworks
@@ -141,7 +141,7 @@ export default defineConfig({
 // app/client.tsx
 import { initClickToSource } from "@bakdotdev/dev-tools";
 
-initClickToSource({ editorProtocol: "cursor" });
+initClickToSource({ editorProtocol: "vscode" });
 ```
 
 ### Vue 3
@@ -161,7 +161,7 @@ export default defineConfig({
 <script setup>
 import { useClickToSource } from "@bakdotdev/dev-tools/vue";
 
-useClickToSource({ editorProtocol: "cursor" });
+useClickToSource({ editorProtocol: "vscode" });
 </script>
 ```
 
@@ -197,7 +197,7 @@ import { initClickToSource } from "@bakdotdev/dev-tools";
 @Component({ ... })
 export class AppComponent implements OnInit {
   ngOnInit() {
-    initClickToSource({ editorProtocol: "cursor" });
+    initClickToSource({ editorProtocol: "vscode" });
   }
 }
 ```
@@ -228,7 +228,7 @@ Initialize the overlay. Returns a cleanup function.
 
 ```ts
 const cleanup = initClickToSource({
-  editorProtocol: "cursor",
+  editorProtocol: "vscode",
 });
 
 cleanup(); // Remove overlay
