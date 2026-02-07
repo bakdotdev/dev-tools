@@ -42,7 +42,10 @@ export default defineConfig({
 // main.tsx
 import { initClickToSource } from "@bakdotdev/dev-tools";
 
-initClickToSource(); // uses "vscode" by default, or "cursor", "zed"
+// Editor options: "vscode" (default) | "cursor" | "zed"
+initClickToSource();
+initClickToSource({ editorProtocol: "cursor" }); // for Cursor
+initClickToSource({ editorProtocol: "zed" });    // for Zed
 ```
 
 Or use the React component:
@@ -54,7 +57,8 @@ function App() {
   return (
     <>
       <YourApp />
-      <ClickToSource editorProtocol="cursor" />
+      {/* editorProtocol: "vscode" (default) | "cursor" | "zed" */}
+      <ClickToSource />
     </>
   );
 }
