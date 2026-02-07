@@ -337,17 +337,18 @@ var ClickToSourceOverlay = class {
     const locations = [];
     let current = element;
     while (current) {
-      if (current instanceof HTMLElement && current.dataset) {
-        const locatorjs = current.dataset.locatorjs;
+      const dataset = current.dataset;
+      if (dataset) {
+        const locatorjs = dataset.locatorjs;
         if (locatorjs) {
           const parsed = this.parseLocatorJsAttribute(locatorjs);
           if (parsed) {
             locations.push({ ...parsed, element: current });
           }
         } else {
-          const file = current.dataset.sourceFile;
-          const line = current.dataset.sourceLine;
-          const column = current.dataset.sourceColumn;
+          const file = dataset.sourceFile;
+          const line = dataset.sourceLine;
+          const column = dataset.sourceColumn;
           if (file && line) {
             locations.push({
               file,
