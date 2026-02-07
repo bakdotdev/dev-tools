@@ -116,7 +116,8 @@ var ClickToSourceOverlay = class {
   handleMouseMove(e) {
     this.mousePos = { x: e.clientX, y: e.clientY };
     if (this.isActive && this.highlightEnabled) {
-      this.hoveredElement = e.target;
+      const target = e.target;
+      this.hoveredElement = target.nodeType === Node.ELEMENT_NODE ? target : target.parentElement;
       this.render();
     }
   }
@@ -128,7 +129,8 @@ var ClickToSourceOverlay = class {
   }
   handleClick(e) {
     if (!this.highlightEnabled || !this.metaDown && !this.ctrlDown) return;
-    const target = e.target ?? this.hoveredElement;
+    const eventTarget = e.target;
+    const target = eventTarget ? eventTarget.nodeType === Node.ELEMENT_NODE ? eventTarget : eventTarget.parentElement : this.hoveredElement;
     if (!target) return;
     if (target.closest("[data-cts-toggle]")) return;
     const skip = this.altDown ? 1 : 0;
@@ -308,7 +310,12 @@ var ClickToSourceOverlay = class {
           }
         }
       }
-      current = current.parentElement;
+      if (current.parentElement) {
+        current = current.parentElement;
+      } else {
+        const root = current.getRootNode();
+        current = root instanceof ShadowRoot ? root.host : null;
+      }
     }
     return locations;
   }

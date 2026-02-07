@@ -167,7 +167,11 @@ export class ClickToSourceOverlay {
   private handleMouseMove(e: MouseEvent): void {
     this.mousePos = { x: e.clientX, y: e.clientY };
     if (this.isActive && this.highlightEnabled) {
-      this.hoveredElement = e.target as HTMLElement;
+      // Handle text nodes, SVG elements, etc. - get nearest Element
+      const target = e.target as Node;
+      this.hoveredElement = (target.nodeType === Node.ELEMENT_NODE
+        ? target
+        : target.parentElement) as HTMLElement;
       this.render();
     }
   }
@@ -182,7 +186,13 @@ export class ClickToSourceOverlay {
   private handleClick(e: MouseEvent): void {
     if (!this.highlightEnabled || (!this.metaDown && !this.ctrlDown)) return;
 
-    const target = (e.target as HTMLElement | null) ?? this.hoveredElement;
+    // Handle text nodes, SVG elements, etc.
+    const eventTarget = e.target as Node | null;
+    const target = eventTarget
+      ? (eventTarget.nodeType === Node.ELEMENT_NODE
+          ? eventTarget
+          : eventTarget.parentElement) as HTMLElement | null
+      : this.hoveredElement;
     if (!target) return;
 
     // Skip clicks on the toggle button
@@ -409,7 +419,15 @@ export class ClickToSourceOverlay {
           }
         }
       }
-      current = current.parentElement;
+
+      // Traverse up: handle both regular DOM and Shadow DOM
+      if (current.parentElement) {
+        current = current.parentElement;
+      } else {
+        // Check for Shadow DOM - traverse through shadow boundary to host element
+        const root = current.getRootNode();
+        current = (root instanceof ShadowRoot) ? root.host : null;
+      }
     }
 
     return locations;
