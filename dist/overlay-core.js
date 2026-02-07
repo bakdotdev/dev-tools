@@ -364,51 +364,7 @@ ${formatted}`;
     link.click();
   }
 };
-
-// src/index.ts
-var globalOverlay = null;
-function initClickToSource(options = {}) {
-  if (typeof window === "undefined") {
-    return () => {
-    };
-  }
-  if (false) {
-    return () => {
-    };
-  }
-  if (globalOverlay) {
-    if (options.editorProtocol) {
-      globalOverlay.setEditorProtocol(options.editorProtocol);
-    }
-    return () => {
-      globalOverlay?.unmount();
-      globalOverlay = null;
-    };
-  }
-  globalOverlay = new ClickToSourceOverlay(options);
-  globalOverlay.mount();
-  return () => {
-    globalOverlay?.unmount();
-    globalOverlay = null;
-  };
-}
-function setEditorProtocol(protocol) {
-  globalOverlay?.setEditorProtocol(protocol);
-}
-function isOverlayActive() {
-  return globalOverlay !== null;
-}
-if (typeof window !== "undefined" && true) {
-  setTimeout(() => {
-    if (!globalOverlay) {
-      initClickToSource();
-    }
-  }, 0);
-}
 export {
-  ClickToSourceOverlay,
-  initClickToSource,
-  isOverlayActive,
-  setEditorProtocol
+  ClickToSourceOverlay
 };
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=overlay-core.js.map

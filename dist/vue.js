@@ -1,3 +1,6 @@
+// src/vue.ts
+import { onMounted, onUnmounted, watch, isRef } from "vue";
+
 // src/overlay-core.ts
 var COLOR_PURPLE_50 = "#715CC7";
 var COLOR_PURPLE_100 = "#5244A3";
@@ -365,50 +368,33 @@ ${formatted}`;
   }
 };
 
-// src/index.ts
-var globalOverlay = null;
-function initClickToSource(options = {}) {
-  if (typeof window === "undefined") {
-    return () => {
-    };
-  }
-  if (false) {
-    return () => {
-    };
-  }
-  if (globalOverlay) {
-    if (options.editorProtocol) {
-      globalOverlay.setEditorProtocol(options.editorProtocol);
+// src/vue.ts
+function useClickToSource(options = {}) {
+  let overlay = null;
+  const getProtocol = () => {
+    if (isRef(options.editorProtocol)) {
+      return options.editorProtocol.value;
     }
-    return () => {
-      globalOverlay?.unmount();
-      globalOverlay = null;
-    };
-  }
-  globalOverlay = new ClickToSourceOverlay(options);
-  globalOverlay.mount();
-  return () => {
-    globalOverlay?.unmount();
-    globalOverlay = null;
+    return options.editorProtocol ?? "cursor";
   };
-}
-function setEditorProtocol(protocol) {
-  globalOverlay?.setEditorProtocol(protocol);
-}
-function isOverlayActive() {
-  return globalOverlay !== null;
-}
-if (typeof window !== "undefined" && true) {
-  setTimeout(() => {
-    if (!globalOverlay) {
-      initClickToSource();
-    }
-  }, 0);
+  onMounted(() => {
+    overlay = new ClickToSourceOverlay({
+      editorProtocol: getProtocol()
+    });
+    overlay.mount();
+  });
+  onUnmounted(() => {
+    overlay?.unmount();
+    overlay = null;
+  });
+  if (isRef(options.editorProtocol)) {
+    watch(options.editorProtocol, (protocol) => {
+      overlay?.setEditorProtocol(protocol);
+    });
+  }
 }
 export {
   ClickToSourceOverlay,
-  initClickToSource,
-  isOverlayActive,
-  setEditorProtocol
+  useClickToSource
 };
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=vue.js.map

@@ -19,12 +19,17 @@ function showCursor() {
   document.getElementById(CURSOR_STYLE_ID)?.remove();
 }
 
+/**
+ * Supported editor protocols for opening source files
+ */
+export type EditorProtocol = "vscode" | "cursor" | "zed";
+
 export interface ClickToSourceProps {
   /**
-   * Editor protocol to use (vscode, cursor, webstorm, etc.)
+   * Editor protocol to use
    * @default "cursor"
    */
-  editorProtocol?: "vscode" | "cursor" | "webstorm" | "idea";
+  editorProtocol?: EditorProtocol;
 
   /**
    * Custom children to render (optional)
@@ -765,21 +770,16 @@ function openInEditor(
 
   switch (protocol) {
     case "vscode":
-      url = `vscode://file/${file}:${line}:${column}`;
-      break;
     case "cursor":
-      url = `cursor://file/${file}:${line}:${column}`;
+      url = `${protocol}://file/${file}:${line}:${column}`;
       break;
-    case "webstorm":
-    case "idea":
-      url = `${protocol}://open?file=${file}&line=${line}&column=${column}`;
+    case "zed":
+      url = `zed://file${file}:${line}:${column}`;
       break;
     default:
       url = `vscode://file/${file}:${line}:${column}`;
   }
 
-  // Use an anchor element to open custom protocol URLs
-  // This works more reliably than window.location.assign for editor protocols
   const link = document.createElement("a");
   link.href = url;
   link.click();

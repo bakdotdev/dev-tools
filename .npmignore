@@ -1,4 +1,18 @@
-# Only ignore node_modules and build cache
-node_modules
+# Test files (not part of the package)
+tests/
+
+# Development files
+scripts/
 .turbo
 *.tsbuildinfo
+.gitignore
+.npmignore
+tsconfig.json
+eslint.config.js
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dev Tools Test - Angular</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, sans-serif; padding: 2rem; background: #0a0a0a; color: #e5e5e5; line-height: 1.5; }
+      h1 { margin-bottom: 1.5rem; font-size: 1.5rem; }
+      h2 { font-size: 1rem; margin-bottom: 0.75rem; color: #a3a3a3; }
+
+      .status-card, .test-elements, .instructions {
+        background: #171717; padding: 1.25rem; border-radius: 8px; margin-bottom: 1rem;
+        border: 1px solid #262626;
+      }
+
+      table { width: 100%; }
+      td { padding: 0.35rem 0; }
+      td:first-child { color: #737373; width: 100px; }
+      code { background: #262626; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.875rem; }
+
+      .status-ok { color: #22c55e; }
+      .status-error { color: #ef4444; }
+      .version-req { color: #737373; font-size: 0.75rem; margin-left: 0.5rem; }
+
+      .element-grid { display: flex; gap: 0.75rem; margin-top: 0.75rem; }
+      .test-box {
+        background: #262626; padding: 1rem; border-radius: 6px;
+        border: 1px solid #404040; min-width: 80px; text-align: center;
+      }
+      .test-box-inner { background: #404040; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem; font-size: 0.875rem; }
+
+      ul { padding-left: 1.25rem; }
+      li { margin: 0.35rem 0; }
+      kbd {
+        background: #262626; padding: 0.2rem 0.5rem; border-radius: 4px;
+        font-size: 0.75rem; border: 1px solid #404040; font-family: inherit;
+      }
+      p { margin-top: 0.75rem; color: #737373; font-size: 0.875rem; }
+      a { color: #a78bfa; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #262626; font-size: 0.875rem; color: #737373; }
+    </style>
+  </head>
+  <body>
+    <app-root></app-root>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

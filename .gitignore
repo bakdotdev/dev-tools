@@ -6,6 +6,12 @@ node_modules
 # Build output
 .turbo
 
+# Test artifacts (not part of the package)
+tests/*/node_modules
+tests/*/dist
+tests/*/.vite
+tests/*/pnpm-lock.yaml
+
 # TypeScript
 *.tsbuildinfo
 

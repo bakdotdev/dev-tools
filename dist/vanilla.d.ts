@@ -7,7 +7,4 @@ export interface OverlayOptions {
 }
 
 export function initClickToSource(options?: OverlayOptions): () => void;
-export function setEditorProtocol(protocol: EditorProtocol): void;
-export function isOverlayActive(): boolean;
-
 export { ClickToSourceOverlay } from "./overlay-core";
