@@ -285,26 +285,23 @@ var ClickToSourceOverlay = class {
     const locations = [];
     let current = element;
     while (current) {
-      const dataset = current.dataset;
-      if (dataset) {
-        const locatorjs = dataset.locatorjs;
-        if (locatorjs) {
-          const parsed = this.parseLocatorJsAttribute(locatorjs);
-          if (parsed) {
-            locations.push({ ...parsed, element: current });
-          }
-        } else {
-          const file = dataset.sourceFile;
-          const line = dataset.sourceLine;
-          const column = dataset.sourceColumn;
-          if (file && line) {
-            locations.push({
-              file,
-              line: parseInt(line, 10),
-              column: column ? parseInt(column, 10) : 0,
-              element: current
-            });
-          }
+      const locatorjs = current.getAttribute("data-locatorjs");
+      if (locatorjs) {
+        const parsed = this.parseLocatorJsAttribute(locatorjs);
+        if (parsed) {
+          locations.push({ ...parsed, element: current });
+        }
+      } else {
+        const file = current.getAttribute("data-source-file");
+        const line = current.getAttribute("data-source-line");
+        const column = current.getAttribute("data-source-column");
+        if (file && line) {
+          locations.push({
+            file,
+            line: parseInt(line, 10),
+            column: column ? parseInt(column, 10) : 0,
+            element: current
+          });
         }
       }
       if (current.parentElement) {

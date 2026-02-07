@@ -394,29 +394,26 @@ export class ClickToSourceOverlay {
     let current: Element | null = element;
 
     while (current) {
-      // Check both HTMLElement and SVGElement (both have dataset via HTMLOrSVGElement)
-      const dataset = (current as HTMLElement | SVGElement).dataset;
-      if (dataset) {
-        const locatorjs = dataset.locatorjs;
-        if (locatorjs) {
-          const parsed = this.parseLocatorJsAttribute(locatorjs);
-          if (parsed) {
-            // Store as HTMLElement for compatibility, SVGElements work with getBoundingClientRect
-            locations.push({ ...parsed, element: current as HTMLElement });
-          }
-        } else {
-          const file = dataset.sourceFile;
-          const line = dataset.sourceLine;
-          const column = dataset.sourceColumn;
+      // Use getAttribute for universal support (works on HTML, SVG, MathML, etc.)
+      const locatorjs = current.getAttribute("data-locatorjs");
+      if (locatorjs) {
+        const parsed = this.parseLocatorJsAttribute(locatorjs);
+        if (parsed) {
+          locations.push({ ...parsed, element: current as HTMLElement });
+        }
+      } else {
+        // Fallback to individual source attributes
+        const file = current.getAttribute("data-source-file");
+        const line = current.getAttribute("data-source-line");
+        const column = current.getAttribute("data-source-column");
 
-          if (file && line) {
-            locations.push({
-              file,
-              line: parseInt(line, 10),
-              column: column ? parseInt(column, 10) : 0,
-              element: current as HTMLElement,
-            });
-          }
+        if (file && line) {
+          locations.push({
+            file,
+            line: parseInt(line, 10),
+            column: column ? parseInt(column, 10) : 0,
+            element: current as HTMLElement,
+          });
         }
       }
 
