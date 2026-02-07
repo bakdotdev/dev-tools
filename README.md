@@ -146,6 +146,8 @@ export default defineConfig({
 
 ### TanStack Start
 
+TanStack Start is built on Vinxi/Vite, so the Vite plugin works directly:
+
 ```ts
 // app.config.ts
 import { defineConfig } from "@tanstack/start/config";
@@ -166,6 +168,8 @@ import { initClickToSource } from "@bakdotdev/dev-tools";
 
 initClickToSource({ editorProtocol: "zed" });
 ```
+
+> **Note:** TanStack Start uses the same Vite plugin as standard Vite projects. The plugin transforms JSX at build time, so it works with any Vite-based framework.
 
 ### Next.js (Turbopack)
 
