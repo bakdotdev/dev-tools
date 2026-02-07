@@ -1,69 +1,45 @@
 # @bakdotdev/dev-tools
 
-Click-to-source development tool for React, Vue, and Angular. Inspect any element, open its source file in your editor, or copy an LLM-friendly snippet to your clipboard.
+Click-to-source development tool. Inspect any element, open its source file in your editor, or copy an LLM-friendly snippet to your clipboard.
 
 [![npm version](https://img.shields.io/npm/v/@bakdotdev/dev-tools.svg)](https://www.npmjs.com/package/@bakdotdev/dev-tools)
 [![GitHub](https://img.shields.io/github/license/bakdotdev/dev-tools)](https://github.com/bakdotdev/dev-tools)
 
 ## Features
 
-- **Click-to-source**: Ctrl+Click any element to open its source file in your editor
-- **LLM snippets**: Cmd+Click to copy formatted code snippets for AI assistants
-- **Parent navigation**: Hold Alt to target parent components instead
-- **Multi-framework**: React, Vue 3, Angular 17+, TanStack Start, Next.js, Nuxt 3
-- **Multi-editor**: VS Code, Cursor, Zed
+- **Click-to-source** — Ctrl+Click any element to open its source file in your editor
+- **LLM snippets** — Cmd+Click to copy formatted code snippets for AI assistants
+- **Framework support** — React, Vue 3, Angular 17+, Next.js, Nuxt 3, TanStack Start
+- **Editor support** — VS Code, Cursor, Zed
 
-## Quick Start
-
-### 1. Install
+## Installation
 
 ```bash
-npm install @bakdotdev/dev-tools
-# or
 pnpm add @bakdotdev/dev-tools
 ```
 
-### 2. Add the Vite Plugin
+## React + Vite
 
-The plugin injects source location data into your components at build time.
+**1. Add the Vite plugin:**
 
 ```ts
 // vite.config.ts
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react"; // or vue(), angular(), etc.
+import react from "@vitejs/plugin-react";
 import { devToolsPlugin } from "@bakdotdev/dev-tools/vite-plugin";
 
 export default defineConfig({
-  plugins: [
-    devToolsPlugin(), // Add before your framework plugin
-    react(),
-  ],
+  plugins: [devToolsPlugin(), react()],
 });
 ```
 
-### 3. Initialize the Overlay
-
-#### Universal (works with any framework)
-
-```ts
-// main.ts or app entry
-import { initClickToSource } from "@bakdotdev/dev-tools";
-
-initClickToSource({ editorProtocol: "zed" }); // or "vscode", "cursor"
-```
-
-#### React
+**2. Initialize the overlay:**
 
 ```tsx
-// App.tsx or layout
+// main.tsx
 import { initClickToSource } from "@bakdotdev/dev-tools";
 
-// Call once at app initialization
-initClickToSource({ editorProtocol: "cursor" });
-
-function App() {
-  return <div>...</div>;
-}
+initClickToSource({ editorProtocol: "cursor" }); // or "vscode", "zed"
 ```
 
 Or use the React component:
@@ -71,107 +47,37 @@ Or use the React component:
 ```tsx
 import { ClickToSource } from "@bakdotdev/dev-tools/react";
 
-function Layout({ children }) {
+function App() {
   return (
     <>
-      {children}
-      {process.env.NODE_ENV === "development" && (
-        <ClickToSource editorProtocol="zed" />
-      )}
+      <YourApp />
+      <ClickToSource editorProtocol="cursor" />
     </>
   );
 }
 ```
 
-#### Vue 3
-
-```vue
-<script setup>
-import { useClickToSource } from "@bakdotdev/dev-tools/vue";
-
-useClickToSource({ editorProtocol: "zed" });
-</script>
-```
-
-#### Angular
-
-```typescript
-// app.component.ts
-import { Component, OnInit } from "@angular/core";
-import { initClickToSource } from "@bakdotdev/dev-tools";
-
-@Component({ ... })
-export class AppComponent implements OnInit {
-  ngOnInit() {
-    initClickToSource({ editorProtocol: "zed" });
-  }
-}
-```
-
-## Editor Configuration
-
-Set the `editorProtocol` option to your preferred editor:
-
-| Editor | Protocol | URL Format |
-|--------|----------|------------|
-| VS Code | `"vscode"` | `vscode://file/{path}:{line}:{column}` |
-| Cursor | `"cursor"` | `cursor://file/{path}:{line}:{column}` |
-| Zed | `"zed"` | `zed://file{path}:{line}:{column}` |
-
-**Default:** `"cursor"`
-
-## Keyboard Shortcuts
+## Usage
 
 | Shortcut | Action |
 |----------|--------|
 | **Ctrl + Click** | Open source file in editor |
-| **Ctrl + Alt + Click** | Open parent component's source |
 | **Cmd + Click** | Copy LLM-friendly snippet |
-| **Cmd + Alt + Click** | Copy parent component's snippet |
+| **Alt + Click** | Target parent component instead |
 
-The overlay shows a toggle switch to enable/disable element highlighting while keeping shortcuts active.
+Combine modifiers: `Ctrl + Alt + Click` opens parent's source, `Cmd + Alt + Click` copies parent's snippet.
 
-## Framework Setup
+### Editor Protocols
 
-### Vite (React, Vue, Solid, etc.)
+| Editor | Protocol |
+|--------|----------|
+| Cursor | `"cursor"` (default) |
+| VS Code | `"vscode"` |
+| Zed | `"zed"` |
 
-```ts
-// vite.config.ts
-import { devToolsPlugin } from "@bakdotdev/dev-tools/vite-plugin";
+## Other Frameworks
 
-export default defineConfig({
-  plugins: [devToolsPlugin(), yourFrameworkPlugin()],
-});
-```
-
-### TanStack Start
-
-TanStack Start is built on Vinxi/Vite, so the Vite plugin works directly:
-
-```ts
-// app.config.ts
-import { defineConfig } from "@tanstack/start/config";
-import { devToolsPlugin } from "@bakdotdev/dev-tools/vite-plugin";
-
-export default defineConfig({
-  vite: {
-    plugins: [devToolsPlugin()],
-  },
-});
-```
-
-Then initialize in your client entry:
-
-```ts
-// app/client.tsx
-import { initClickToSource } from "@bakdotdev/dev-tools";
-
-initClickToSource({ editorProtocol: "zed" });
-```
-
-> **Note:** TanStack Start uses the same Vite plugin as standard Vite projects. The plugin transforms JSX at build time, so it works with any Vite-based framework.
-
-### Next.js (Turbopack)
+### Next.js
 
 ```ts
 // next.config.ts
@@ -195,7 +101,7 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 ```
 
-### Next.js (Webpack)
+For Webpack (non-Turbopack):
 
 ```js
 // next.config.js
@@ -213,6 +119,48 @@ module.exports = {
 };
 ```
 
+### TanStack Start
+
+```ts
+// app.config.ts
+import { defineConfig } from "@tanstack/start/config";
+import { devToolsPlugin } from "@bakdotdev/dev-tools/vite-plugin";
+
+export default defineConfig({
+  vite: {
+    plugins: [devToolsPlugin()],
+  },
+});
+```
+
+```ts
+// app/client.tsx
+import { initClickToSource } from "@bakdotdev/dev-tools";
+
+initClickToSource({ editorProtocol: "cursor" });
+```
+
+### Vue 3
+
+```ts
+// vite.config.ts
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import { devToolsPlugin } from "@bakdotdev/dev-tools/vite-plugin";
+
+export default defineConfig({
+  plugins: [devToolsPlugin(), vue()],
+});
+```
+
+```vue
+<script setup>
+import { useClickToSource } from "@bakdotdev/dev-tools/vue";
+
+useClickToSource({ editorProtocol: "cursor" });
+</script>
+```
+
 ### Nuxt 3
 
 ```ts
@@ -226,7 +174,31 @@ export default defineNuxtConfig({
 });
 ```
 
-## Vite Plugin Options
+### Angular 17+
+
+```ts
+// vite.config.ts (Angular uses Vite by default in v17+)
+import { devToolsPlugin } from "@bakdotdev/dev-tools/vite-plugin";
+
+export default {
+  plugins: [devToolsPlugin()],
+};
+```
+
+```ts
+// app.component.ts
+import { Component, OnInit } from "@angular/core";
+import { initClickToSource } from "@bakdotdev/dev-tools";
+
+@Component({ ... })
+export class AppComponent implements OnInit {
+  ngOnInit() {
+    initClickToSource({ editorProtocol: "cursor" });
+  }
+}
+```
+
+## Plugin Options
 
 ```ts
 devToolsPlugin({
@@ -239,31 +211,28 @@ devToolsPlugin({
   // File patterns to include
   include: [/\.[jt]sx?$/, /\.vue$/, /\.component\.html$/],
 
-  // File patterns to exclude (default includes node_modules)
+  // File patterns to exclude
   exclude: [/node_modules/, /\.test\./],
 });
 ```
 
-## API Reference
+## API
 
 ### `initClickToSource(options?)`
 
-Initialize the overlay. Safe to call multiple times.
+Initialize the overlay. Returns a cleanup function.
 
 ```ts
-import { initClickToSource } from "@bakdotdev/dev-tools";
-
 const cleanup = initClickToSource({
-  editorProtocol: "zed", // "vscode" | "cursor" | "zed"
+  editorProtocol: "cursor",
 });
 
-// Optional: remove overlay
-cleanup();
+cleanup(); // Remove overlay
 ```
 
 ### `setEditorProtocol(protocol)`
 
-Change the editor at runtime.
+Change editor at runtime.
 
 ```ts
 import { setEditorProtocol } from "@bakdotdev/dev-tools";
@@ -273,27 +242,21 @@ setEditorProtocol("vscode");
 
 ### `isOverlayActive()`
 
-Check if the overlay is currently mounted.
+Check if overlay is mounted.
 
 ```ts
 import { isOverlayActive } from "@bakdotdev/dev-tools";
 
 if (isOverlayActive()) {
-  console.log("Dev tools overlay is active");
+  console.log("Dev tools active");
 }
 ```
 
 ## Requirements
 
-- React 18+, Vue 3+, Angular 17+, or TanStack Start 1.0+
-- Vite 5+ or webpack-compatible bundler
 - Node.js 18+
-
-## Links
-
-- [GitHub Repository](https://github.com/bakdotdev/dev-tools)
-- [npm Package](https://www.npmjs.com/package/@bakdotdev/dev-tools)
-- [Report Issues](https://github.com/bakdotdev/dev-tools/issues)
+- Vite 5+ or webpack-compatible bundler
+- React 18+, Vue 3+, or Angular 17+
 
 ## License
 
