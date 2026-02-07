@@ -9,6 +9,9 @@ Click-to-source development tool. Inspect any element, open its source file in y
 
 - **Click-to-source** — Ctrl+Click any element to open its source file in your editor
 - **LLM snippets** — Cmd+Click to copy formatted code snippets for AI assistants
+- **Parent navigation** — Hold Alt to target the parent component instead
+- **Visual inspector** — Crosshairs, element badges, and file path display
+- **Toggle highlighting** — Switch button to enable/disable visual overlay
 - **Framework support** — React, Vue 3, Angular 17+, Next.js, Nuxt 3, TanStack Start
 - **Editor support** — VS Code, Cursor, Zed
 
@@ -61,11 +64,12 @@ function App() {
 
 | Shortcut | Action |
 |----------|--------|
-| **Ctrl + Click** | Open source file in editor |
-| **Cmd + Click** | Copy LLM-friendly snippet |
-| **Alt + Click** | Target parent component instead |
+| **Ctrl + Click** | Open element's source in editor |
+| **Ctrl + Alt + Click** | Open parent component's source in editor |
+| **Cmd + Click** | Copy element as LLM-friendly snippet |
+| **Cmd + Alt + Click** | Copy parent component as LLM-friendly snippet |
 
-Combine modifiers: `Ctrl + Alt + Click` opens parent's source, `Cmd + Alt + Click` copies parent's snippet.
+The overlay displays a toggle switch at the bottom to enable/disable visual highlighting while keeping keyboard shortcuts active.
 
 ### Editor Protocols
 
