@@ -75,6 +75,20 @@ function App() {
 
 The overlay displays a toggle switch at the bottom to enable/disable visual highlighting while keeping keyboard shortcuts active.
 
+### LLM Snippet Format
+
+When copying with Cmd+Click, the snippet is formatted for optimal LLM parsing:
+
+```xml
+<code source="/path/to/file.tsx:42:8">
+<div class="example">
+  <span>Content</span>
+</div>
+</code>
+```
+
+The `source` attribute contains `file:line:column`. This format works across all major LLMs (Claude, GPT, Gemini, etc.).
+
 ### Editor Protocols
 
 | Editor | Protocol |

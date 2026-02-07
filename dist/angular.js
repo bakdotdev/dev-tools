@@ -396,8 +396,10 @@ var ClickToSourceOverlay = class {
   getLLMSnippet(element, sourceLocation) {
     const cleaned = this.cleanElement(element);
     const formatted = this.formatHTML(cleaned.outerHTML);
-    return `${sourceLocation.file}:${sourceLocation.line}
-${formatted}`;
+    const location = `${sourceLocation.file}:${sourceLocation.line}:${sourceLocation.column}`;
+    return `<code source="${location}">
+${formatted}
+</code>`;
   }
   openInEditor(sourceLocation) {
     const { file, line, column } = sourceLocation;

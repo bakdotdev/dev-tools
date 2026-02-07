@@ -453,7 +453,11 @@ export class ClickToSourceOverlay {
   private getLLMSnippet(element: HTMLElement, sourceLocation: SourceLocation): string {
     const cleaned = this.cleanElement(element);
     const formatted = this.formatHTML(cleaned.outerHTML);
-    return `${sourceLocation.file}:${sourceLocation.line}\n${formatted}`;
+    const location = `${sourceLocation.file}:${sourceLocation.line}:${sourceLocation.column}`;
+
+    return `<code source="${location}">
+${formatted}
+</code>`;
   }
 
   private openInEditor(sourceLocation: SourceLocation): void {
