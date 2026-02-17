@@ -8,7 +8,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: npm
+    # environment: npm  # Uncomment if you configured an environment in npm trusted publisher
     permissions:
       contents: read
       id-token: write
