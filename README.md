@@ -280,10 +280,23 @@ Initialize the overlay. Returns a cleanup function.
 ```ts
 const cleanup = initClickToSource({
   editorProtocol: "vscode",
+  modifierLocation: "any", // "any" | "left" | "right"
 });
 
 cleanup(); // Remove overlay
 ```
+
+### `modifierLocation` Option
+
+Control which modifier keys (Ctrl, Cmd, Alt) activate the tool:
+
+| Value | Description |
+|-------|-------------|
+| `"any"` (default) | Respond to both left and right modifier keys |
+| `"left"` | Only respond to left-side modifier keys |
+| `"right"` | Only respond to right-side modifier keys |
+
+This is useful when you want to reserve one side of the keyboard for other shortcuts. For example, use `"right"` to only activate the tool with right-Ctrl/Cmd, leaving left-Ctrl/Cmd free for browser shortcuts.
 
 ### `setEditorProtocol(protocol)`
 

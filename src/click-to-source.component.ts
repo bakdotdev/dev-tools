@@ -6,7 +6,7 @@ import {
   OnChanges,
   SimpleChanges,
 } from "@angular/core";
-import { ClickToSourceOverlay, type EditorProtocol } from "./overlay-core";
+import { ClickToSourceOverlay, type EditorProtocol, type ModifierLocation } from "./overlay-core";
 
 @Component({
   selector: "click-to-source",
@@ -15,12 +15,20 @@ import { ClickToSourceOverlay, type EditorProtocol } from "./overlay-core";
 })
 export class ClickToSourceComponent implements OnInit, OnDestroy, OnChanges {
   @Input() editorProtocol: EditorProtocol = "cursor";
+  /**
+   * Which modifier key location to respond to.
+   * - "any" (default): Respond to both left and right modifier keys
+   * - "left": Only respond to left-side modifier keys
+   * - "right": Only respond to right-side modifier keys
+   */
+  @Input() modifierLocation: ModifierLocation = "any";
 
   private overlay: ClickToSourceOverlay | null = null;
 
   ngOnInit(): void {
     this.overlay = new ClickToSourceOverlay({
       editorProtocol: this.editorProtocol,
+      modifierLocation: this.modifierLocation,
     });
     this.overlay.mount();
   }
@@ -33,6 +41,9 @@ export class ClickToSourceComponent implements OnInit, OnDestroy, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes["editorProtocol"] && this.overlay) {
       this.overlay.setEditorProtocol(this.editorProtocol);
+    }
+    if (changes["modifierLocation"] && this.overlay) {
+      this.overlay.setModifierLocation(this.modifierLocation);
     }
   }
 }

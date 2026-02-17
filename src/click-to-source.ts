@@ -13,9 +13,9 @@
  * ```
  */
 
-import { ClickToSourceOverlay, type EditorProtocol, type OverlayOptions } from "./overlay-core";
+import { ClickToSourceOverlay, type EditorProtocol, type ModifierLocation, type OverlayOptions } from "./overlay-core";
 
-export type { EditorProtocol, OverlayOptions };
+export type { EditorProtocol, ModifierLocation, OverlayOptions };
 
 /**
  * Initialize the click-to-source overlay.

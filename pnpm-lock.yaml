@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@angular/core':
+        specifier: '>=17.0.0'
+        version: 21.1.4(rxjs@7.8.2)
       '@babel/core':
         specifier: ^7.24.0
         version: 7.29.0
@@ -56,6 +59,19 @@ importers:
         version: 6.4.1(@types/node@22.19.7)
 
 packages:
+
+  '@angular/core@21.1.4':
+    resolution: {integrity: sha512-QBDO5SaVYTVQ0fIN9Qd7US9cUCgs2vM9x6K18PTUKmygIkHVHTFdzwm4MO5gpCOFzJseGbS+dNzqn+v0PaKf9g==}
+    engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+    peerDependencies:
+      '@angular/compiler': 21.1.4
+      rxjs: ^6.5.3 || ^7.4.0
+      zone.js: ~0.15.0 || ~0.16.0
+    peerDependenciesMeta:
+      '@angular/compiler':
+        optional: true
+      zone.js:
+        optional: true
 
   '@babel/code-frame@7.29.0':
     resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
@@ -802,6 +818,9 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
+  rxjs@7.8.2:
+    resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
+
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
     hasBin: true
@@ -813,6 +832,9 @@ packages:
   tinyglobby@0.2.15:
     resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
     engines: {node: '>=12.0.0'}
+
+  tslib@2.8.1:
+    resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
@@ -880,6 +902,11 @@ packages:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
 
 snapshots:
+
+  '@angular/core@21.1.4(rxjs@7.8.2)':
+    dependencies:
+      rxjs: 7.8.2
+      tslib: 2.8.1
 
   '@babel/code-frame@7.29.0':
     dependencies:
@@ -1556,6 +1583,10 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.57.1
       fsevents: 2.3.3
 
+  rxjs@7.8.2:
+    dependencies:
+      tslib: 2.8.1
+
   semver@6.3.1: {}
 
   source-map-js@1.2.1: {}
@@ -1564,6 +1595,8 @@ snapshots:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
+
+  tslib@2.8.1: {}
 
   typescript@5.9.3: {}
 

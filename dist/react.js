@@ -225,8 +225,15 @@ function showCursor() {
   document.getElementById(CURSOR_STYLE_ID)?.remove();
 }
 var HIGHLIGHT_ENABLED_KEY = "cts_highlight_enabled";
+function matchesModifierLocation(e, location) {
+  if (location === "any") return true;
+  if (location === "left") return e.location === 1;
+  if (location === "right") return e.location === 2;
+  return true;
+}
 function ClickToSource({
   editorProtocol = "cursor",
+  modifierLocation = "any",
   children
 }) {
   const { clickToSourceEnabled } = useDevTools();
@@ -293,12 +300,14 @@ function ClickToSource({
       setTargetLevel(altDown.current ? "parent" : "element");
     };
     const handleKeyDown = (e) => {
+      if (!matchesModifierLocation(e, modifierLocation)) return;
       if (e.key === "Meta") metaDown.current = true;
       if (e.key === "Control") ctrlDown.current = true;
       if (e.key === "Alt") altDown.current = true;
       updateState();
     };
     const handleKeyUp = (e) => {
+      if (!matchesModifierLocation(e, modifierLocation)) return;
       if (e.key === "Meta") metaDown.current = false;
       if (e.key === "Control") ctrlDown.current = false;
       if (e.key === "Alt") altDown.current = false;
@@ -315,7 +324,7 @@ function ClickToSource({
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
     };
-  }, [clickToSourceEnabled, highlightEnabled, deactivate]);
+  }, [clickToSourceEnabled, highlightEnabled, deactivate, modifierLocation]);
   useEffect2(() => {
     if (!clickToSourceEnabled || !isActive || !highlightEnabled) {
       setHoveredElement(null);
@@ -340,9 +349,8 @@ function ClickToSource({
       const target = e.target ?? hoveredElement;
       if (!target) return;
       if (target.closest("[data-cts-toggle]")) return;
-      const skip = altDown.current ? 1 : 0;
       const locations = getAllSourceLocations(target);
-      const locationWithElement = locations[skip] ?? locations[locations.length - 1];
+      const locationWithElement = getTargetLocation(locations, altDown.current);
       if (!locationWithElement) return;
       const sourceLocation = {
         file: locationWithElement.file,
@@ -600,9 +608,8 @@ function getAccentColor0(mode, targetLevel) {
   return COLOR_PURPLE_0;
 }
 function InspectorBadges({ element, mode, targetLevel }) {
-  const skip = targetLevel === "parent" ? 1 : 0;
   const locations = getAllSourceLocations(element);
-  const locationWithElement = locations[skip] ?? locations[locations.length - 1];
+  const locationWithElement = getTargetLocation(locations, targetLevel === "parent");
   if (!locationWithElement) return null;
   const targetElement = locationWithElement.element;
   const sourceLocation = locationWithElement;
@@ -699,6 +706,15 @@ function parseLocatorJsAttribute(value) {
     line,
     column: isNaN(column) ? 0 : column
   };
+}
+function getTargetLocation(locations, targetParent) {
+  if (locations.length === 0) return null;
+  if (!targetParent) {
+    return locations[0];
+  }
+  const currentFile = locations[0].file;
+  const parentLocation = locations.find((loc) => loc.file !== currentFile);
+  return parentLocation ?? locations[locations.length - 1];
 }
 function getAllSourceLocations(element) {
   const locations = [];

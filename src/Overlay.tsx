@@ -24,12 +24,26 @@ function showCursor() {
  */
 export type EditorProtocol = "vscode" | "cursor" | "zed";
 
+/**
+ * Which modifier key location to respond to
+ */
+export type ModifierLocation = "any" | "left" | "right";
+
 export interface ClickToSourceProps {
   /**
    * Editor protocol to use
    * @default "cursor"
    */
   editorProtocol?: EditorProtocol;
+
+  /**
+   * Which modifier key location to respond to.
+   * - "any" (default): Respond to both left and right modifier keys
+   * - "left": Only respond to left-side modifier keys
+   * - "right": Only respond to right-side modifier keys
+   * @default "any"
+   */
+  modifierLocation?: ModifierLocation;
 
   /**
    * Custom children to render (optional)
@@ -56,8 +70,22 @@ interface SourceLocation {
  */
 const HIGHLIGHT_ENABLED_KEY = "cts_highlight_enabled";
 
+/**
+ * Check if a key event's location matches the configured modifier location.
+ * KeyboardEvent.location values:
+ * - 1 = DOM_KEY_LOCATION_LEFT
+ * - 2 = DOM_KEY_LOCATION_RIGHT
+ */
+function matchesModifierLocation(e: KeyboardEvent, location: ModifierLocation): boolean {
+  if (location === "any") return true;
+  if (location === "left") return e.location === 1;
+  if (location === "right") return e.location === 2;
+  return true;
+}
+
 export function ClickToSource({
   editorProtocol = "cursor",
+  modifierLocation = "any",
   children,
 }: ClickToSourceProps) {
   const { clickToSourceEnabled } = useDevTools();
@@ -135,6 +163,7 @@ export function ClickToSource({
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!matchesModifierLocation(e, modifierLocation)) return;
       if (e.key === "Meta") metaDown.current = true;
       if (e.key === "Control") ctrlDown.current = true;
       if (e.key === "Alt") altDown.current = true;
@@ -142,6 +171,7 @@ export function ClickToSource({
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
+      if (!matchesModifierLocation(e, modifierLocation)) return;
       if (e.key === "Meta") metaDown.current = false;
       if (e.key === "Control") ctrlDown.current = false;
       if (e.key === "Alt") altDown.current = false;
@@ -162,7 +192,7 @@ export function ClickToSource({
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
     };
-  }, [clickToSourceEnabled, highlightEnabled, deactivate]);
+  }, [clickToSourceEnabled, highlightEnabled, deactivate, modifierLocation]);
 
   // Track hovered element and mouse position (only when active and highlighting enabled)
   useEffect(() => {
@@ -200,10 +230,9 @@ export function ClickToSource({
       // Skip clicks on the toggle button
       if (target.closest("[data-cts-toggle]")) return;
 
-      // Use skip=1 for parent level (Alt held)
-      const skip = altDown.current ? 1 : 0;
+      // Get target location - when Alt held, find parent component (different file)
       const locations = getAllSourceLocations(target);
-      const locationWithElement = locations[skip] ?? locations[locations.length - 1];
+      const locationWithElement = getTargetLocation(locations, altDown.current);
 
       // Only hijack clicks on elements with source location data
       if (!locationWithElement) return;
@@ -491,9 +520,9 @@ function getAccentColor0(mode: Mode, targetLevel: TargetLevel): string {
  */
 function InspectorBadges({ element, mode, targetLevel }: { element: HTMLElement; mode: Mode; targetLevel: TargetLevel }) {
   // Get the appropriate element based on target level
-  const skip = targetLevel === "parent" ? 1 : 0;
+  // When targeting parent, find first element in a different file (parent component)
   const locations = getAllSourceLocations(element);
-  const locationWithElement = locations[skip] ?? locations[locations.length - 1];
+  const locationWithElement = getTargetLocation(locations, targetLevel === "parent");
 
   if (!locationWithElement) return null;
 
@@ -609,6 +638,29 @@ function parseLocatorJsAttribute(value: string): SourceLocation | null {
 
 interface SourceLocationWithElement extends SourceLocation {
   element: HTMLElement;
+}
+
+/**
+ * Find the target source location based on whether we want the element or parent component.
+ * When targeting parent, finds the first element in a DIFFERENT file (actual parent component),
+ * not just the next element with source data (which could be in the same file).
+ */
+function getTargetLocation(
+  locations: SourceLocationWithElement[],
+  targetParent: boolean
+): SourceLocationWithElement | null {
+  if (locations.length === 0) return null;
+
+  if (!targetParent) {
+    return locations[0];
+  }
+
+  // Find first location in a different file (parent component)
+  const currentFile = locations[0].file;
+  const parentLocation = locations.find(loc => loc.file !== currentFile);
+
+  // Fall back to last location if no different file found
+  return parentLocation ?? locations[locations.length - 1];
 }
 
 /**

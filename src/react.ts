@@ -37,7 +37,7 @@
  */
 
 export { ClickToSource } from "./Overlay";
-export type { ClickToSourceProps, EditorProtocol } from "./Overlay";
+export type { ClickToSourceProps, EditorProtocol, ModifierLocation } from "./Overlay";
 
 export { LayoutDebugOverlay } from "./LayoutDebugOverlay";
 

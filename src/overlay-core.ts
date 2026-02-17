@@ -4,6 +4,7 @@
  */
 
 export type EditorProtocol = "vscode" | "cursor" | "zed";
+export type ModifierLocation = "any" | "left" | "right";
 type Mode = "editor" | "copy";
 type TargetLevel = "element" | "parent";
 
@@ -19,6 +20,13 @@ interface SourceLocationWithElement extends SourceLocation {
 
 export interface OverlayOptions {
   editorProtocol?: EditorProtocol;
+  /**
+   * Which modifier key location to respond to.
+   * - "any" (default): Respond to both left and right modifier keys
+   * - "left": Only respond to left-side modifier keys
+   * - "right": Only respond to right-side modifier keys
+   */
+  modifierLocation?: ModifierLocation;
   onActivate?: () => void;
   onDeactivate?: () => void;
 }
@@ -64,6 +72,7 @@ function getAccentColor0(mode: Mode, targetLevel: TargetLevel): string {
 
 export class ClickToSourceOverlay {
   private editorProtocol: EditorProtocol;
+  private modifierLocation: ModifierLocation;
   private isActive = false;
   private mode: Mode = "editor";
   private targetLevel: TargetLevel = "element";
@@ -86,6 +95,7 @@ export class ClickToSourceOverlay {
 
   constructor(options: OverlayOptions = {}) {
     this.editorProtocol = options.editorProtocol ?? "vscode";
+    this.modifierLocation = options.modifierLocation ?? "any";
     this.onActivate = options.onActivate;
     this.onDeactivate = options.onDeactivate;
 
@@ -124,6 +134,10 @@ export class ClickToSourceOverlay {
     this.editorProtocol = protocol;
   }
 
+  setModifierLocation(location: ModifierLocation): void {
+    this.modifierLocation = location;
+  }
+
   private createContainer(): void {
     if (this.container) return;
     this.container = document.createElement("div");
@@ -150,7 +164,21 @@ export class ClickToSourceOverlay {
     document.getElementById(CURSOR_STYLE_ID)?.remove();
   }
 
+  /**
+   * Check if a key event's location matches the configured modifier location.
+   * KeyboardEvent.location values:
+   * - 1 = DOM_KEY_LOCATION_LEFT
+   * - 2 = DOM_KEY_LOCATION_RIGHT
+   */
+  private matchesModifierLocation(e: KeyboardEvent): boolean {
+    if (this.modifierLocation === "any") return true;
+    if (this.modifierLocation === "left") return e.location === 1;
+    if (this.modifierLocation === "right") return e.location === 2;
+    return true;
+  }
+
   private handleKeyDown(e: KeyboardEvent): void {
+    if (!this.matchesModifierLocation(e)) return;
     if (e.key === "Meta") this.metaDown = true;
     if (e.key === "Control") this.ctrlDown = true;
     if (e.key === "Alt") this.altDown = true;
@@ -158,6 +186,7 @@ export class ClickToSourceOverlay {
   }
 
   private handleKeyUp(e: KeyboardEvent): void {
+    if (!this.matchesModifierLocation(e)) return;
     if (e.key === "Meta") this.metaDown = false;
     if (e.key === "Control") this.ctrlDown = false;
     if (e.key === "Alt") this.altDown = false;

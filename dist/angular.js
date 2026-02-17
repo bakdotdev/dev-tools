@@ -98,6 +98,7 @@ var ClickToSourceOverlay = class {
     this.altDown = false;
     this.container = null;
     this.editorProtocol = options.editorProtocol ?? "vscode";
+    this.modifierLocation = options.modifierLocation ?? "any";
     this.onActivate = options.onActivate;
     this.onDeactivate = options.onDeactivate;
     const stored = localStorage.getItem(HIGHLIGHT_ENABLED_KEY);
@@ -130,6 +131,9 @@ var ClickToSourceOverlay = class {
   setEditorProtocol(protocol) {
     this.editorProtocol = protocol;
   }
+  setModifierLocation(location) {
+    this.modifierLocation = location;
+  }
   createContainer() {
     if (this.container) return;
     this.container = document.createElement("div");
@@ -152,13 +156,27 @@ var ClickToSourceOverlay = class {
   showCursor() {
     document.getElementById(CURSOR_STYLE_ID)?.remove();
   }
+  /**
+   * Check if a key event's location matches the configured modifier location.
+   * KeyboardEvent.location values:
+   * - 1 = DOM_KEY_LOCATION_LEFT
+   * - 2 = DOM_KEY_LOCATION_RIGHT
+   */
+  matchesModifierLocation(e) {
+    if (this.modifierLocation === "any") return true;
+    if (this.modifierLocation === "left") return e.location === 1;
+    if (this.modifierLocation === "right") return e.location === 2;
+    return true;
+  }
   handleKeyDown(e) {
+    if (!this.matchesModifierLocation(e)) return;
     if (e.key === "Meta") this.metaDown = true;
     if (e.key === "Control") this.ctrlDown = true;
     if (e.key === "Alt") this.altDown = true;
     this.updateState();
   }
   handleKeyUp(e) {
+    if (!this.matchesModifierLocation(e)) return;
     if (e.key === "Meta") this.metaDown = false;
     if (e.key === "Control") this.ctrlDown = false;
     if (e.key === "Alt") this.altDown = false;
@@ -427,20 +445,22 @@ ${formatted}
 };
 
 // src/click-to-source.component.ts
-var _editorProtocol_dec, _ClickToSourceComponent_decorators, _init;
+var _modifierLocation_dec, _editorProtocol_dec, _ClickToSourceComponent_decorators, _init;
 _ClickToSourceComponent_decorators = [Component({
   selector: "click-to-source",
   standalone: true,
   template: "<ng-content></ng-content>"
-})], _editorProtocol_dec = [Input()];
+})], _editorProtocol_dec = [Input()], _modifierLocation_dec = [Input()];
 var ClickToSourceComponent = class {
   constructor() {
     this.editorProtocol = __runInitializers(_init, 8, this, "cursor"), __runInitializers(_init, 11, this);
+    this.modifierLocation = __runInitializers(_init, 12, this, "any"), __runInitializers(_init, 15, this);
     this.overlay = null;
   }
   ngOnInit() {
     this.overlay = new ClickToSourceOverlay({
-      editorProtocol: this.editorProtocol
+      editorProtocol: this.editorProtocol,
+      modifierLocation: this.modifierLocation
     });
     this.overlay.mount();
   }
@@ -452,10 +472,14 @@ var ClickToSourceComponent = class {
     if (changes["editorProtocol"] && this.overlay) {
       this.overlay.setEditorProtocol(this.editorProtocol);
     }
+    if (changes["modifierLocation"] && this.overlay) {
+      this.overlay.setModifierLocation(this.modifierLocation);
+    }
   }
 };
 _init = __decoratorStart(null);
 __decorateElement(_init, 5, "editorProtocol", _editorProtocol_dec, ClickToSourceComponent);
+__decorateElement(_init, 5, "modifierLocation", _modifierLocation_dec, ClickToSourceComponent);
 ClickToSourceComponent = __decorateElement(_init, 0, "ClickToSourceComponent", _ClickToSourceComponent_decorators, ClickToSourceComponent);
 __runInitializers(_init, 1, ClickToSourceComponent);
 export {
