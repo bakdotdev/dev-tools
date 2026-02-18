@@ -158,6 +158,47 @@ export class ClickToSourceOverlay {
     this.container.id = OVERLAY_CONTAINER_ID;
     this.container.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:999998;";
     document.body.appendChild(this.container);
+
+    // Use event delegation for UI interactions (prevents issues with innerHTML rebuilds)
+    this.container.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+
+      if (target.closest("[data-cts-toggle]")) {
+        e.stopPropagation();
+        this.toggleHighlight();
+        return;
+      }
+
+      if (target.closest("[data-cts-settings]")) {
+        e.stopPropagation();
+        this.toggleSettings();
+        return;
+      }
+
+      if (target.closest("[data-cts-settings-backdrop]")) {
+        e.stopPropagation();
+        this.toggleSettings();
+        return;
+      }
+    });
+
+    this.container.addEventListener("change", (e) => {
+      const target = e.target as HTMLElement;
+
+      if (target.matches("[data-cts-editor-select]")) {
+        e.stopPropagation();
+        const value = (target as HTMLSelectElement).value as EditorProtocol;
+        this.setEditorProtocol(value);
+        return;
+      }
+
+      if (target.matches("[data-cts-modifier-select]")) {
+        e.stopPropagation();
+        const value = (target as HTMLSelectElement).value as ModifierLocation;
+        this.setModifierLocation(value);
+        return;
+      }
+    });
   }
 
   private removeContainer(): void {
@@ -365,54 +406,6 @@ export class ClickToSourceOverlay {
     html += this.renderInstructions();
 
     this.container.innerHTML = html;
-
-    // Attach toggle handler
-    const toggleBtn = this.container.querySelector("[data-cts-toggle]");
-    if (toggleBtn) {
-      (toggleBtn as HTMLElement).style.pointerEvents = "auto";
-      toggleBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.toggleHighlight();
-      });
-    }
-
-    // Attach settings button handler
-    const settingsBtn = this.container.querySelector("[data-cts-settings]");
-    if (settingsBtn) {
-      settingsBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.toggleSettings();
-      });
-    }
-
-    // Attach settings backdrop handler (close on click outside)
-    const backdrop = this.container.querySelector("[data-cts-settings-backdrop]");
-    if (backdrop) {
-      backdrop.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.toggleSettings();
-      });
-    }
-
-    // Attach editor select handler
-    const editorSelect = this.container.querySelector("[data-cts-editor-select]");
-    if (editorSelect) {
-      editorSelect.addEventListener("change", (e) => {
-        e.stopPropagation();
-        const value = (e.target as HTMLSelectElement).value as EditorProtocol;
-        this.setEditorProtocol(value);
-      });
-    }
-
-    // Attach modifier location select handler
-    const modifierSelect = this.container.querySelector("[data-cts-modifier-select]");
-    if (modifierSelect) {
-      modifierSelect.addEventListener("change", (e) => {
-        e.stopPropagation();
-        const value = (e.target as HTMLSelectElement).value as ModifierLocation;
-        this.setModifierLocation(value);
-      });
-    }
   }
 
   private renderInstructions(): string {

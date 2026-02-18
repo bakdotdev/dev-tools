@@ -151,6 +151,39 @@ var ClickToSourceOverlay = class {
     this.container.id = OVERLAY_CONTAINER_ID;
     this.container.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:999998;";
     document.body.appendChild(this.container);
+    this.container.addEventListener("click", (e) => {
+      const target = e.target;
+      if (target.closest("[data-cts-toggle]")) {
+        e.stopPropagation();
+        this.toggleHighlight();
+        return;
+      }
+      if (target.closest("[data-cts-settings]")) {
+        e.stopPropagation();
+        this.toggleSettings();
+        return;
+      }
+      if (target.closest("[data-cts-settings-backdrop]")) {
+        e.stopPropagation();
+        this.toggleSettings();
+        return;
+      }
+    });
+    this.container.addEventListener("change", (e) => {
+      const target = e.target;
+      if (target.matches("[data-cts-editor-select]")) {
+        e.stopPropagation();
+        const value = target.value;
+        this.setEditorProtocol(value);
+        return;
+      }
+      if (target.matches("[data-cts-modifier-select]")) {
+        e.stopPropagation();
+        const value = target.value;
+        this.setModifierLocation(value);
+        return;
+      }
+    });
   }
   removeContainer() {
     this.container?.remove();
@@ -309,44 +342,6 @@ var ClickToSourceOverlay = class {
     }
     html += this.renderInstructions();
     this.container.innerHTML = html;
-    const toggleBtn = this.container.querySelector("[data-cts-toggle]");
-    if (toggleBtn) {
-      toggleBtn.style.pointerEvents = "auto";
-      toggleBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.toggleHighlight();
-      });
-    }
-    const settingsBtn = this.container.querySelector("[data-cts-settings]");
-    if (settingsBtn) {
-      settingsBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.toggleSettings();
-      });
-    }
-    const backdrop = this.container.querySelector("[data-cts-settings-backdrop]");
-    if (backdrop) {
-      backdrop.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.toggleSettings();
-      });
-    }
-    const editorSelect = this.container.querySelector("[data-cts-editor-select]");
-    if (editorSelect) {
-      editorSelect.addEventListener("change", (e) => {
-        e.stopPropagation();
-        const value = e.target.value;
-        this.setEditorProtocol(value);
-      });
-    }
-    const modifierSelect = this.container.querySelector("[data-cts-modifier-select]");
-    if (modifierSelect) {
-      modifierSelect.addEventListener("change", (e) => {
-        e.stopPropagation();
-        const value = e.target.value;
-        this.setModifierLocation(value);
-      });
-    }
   }
   renderInstructions() {
     const shortcuts = [
