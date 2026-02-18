@@ -12,6 +12,7 @@ Click-to-source development tool. Inspect any element, open its source file in y
 - **Parent navigation** — Hold Alt to target the parent component instead
 - **Visual inspector** — Crosshairs, element badges, and file path display
 - **Toggle highlighting** — Switch button to enable/disable visual overlay
+- **Settings UI** — Configure editor and modifier key location via gear icon
 - **Framework support** — React, Vue 3, Angular 17+, Next.js, Nuxt 3, TanStack Start
 - **Editor support** — VS Code, Cursor, Zed
 
@@ -73,7 +74,13 @@ function App() {
 | **Cmd + Click** | Copy element as LLM-friendly snippet |
 | **Cmd + Alt + Click** | Copy parent component as LLM-friendly snippet |
 
-The overlay displays a toggle switch at the bottom to enable/disable visual highlighting while keeping keyboard shortcuts active.
+The overlay displays controls at the bottom:
+- **Toggle switch** — Enable/disable visual highlighting (keyboard shortcuts remain active)
+- **Settings button** (gear icon) — Opens a dialog to configure:
+  - **Editor** — Choose between VS Code, Cursor, or Zed
+  - **Modifier Keys** — Left side only, right side only, or both sides
+
+Settings are persisted to localStorage and will be remembered across sessions.
 
 ### LLM Snippet Format
 
@@ -292,11 +299,13 @@ Control which modifier keys (Ctrl, Cmd, Alt) activate the tool:
 
 | Value | Description |
 |-------|-------------|
-| `"any"` (default) | Respond to both left and right modifier keys |
-| `"left"` | Only respond to left-side modifier keys |
+| `"left"` (default) | Only respond to left-side modifier keys |
 | `"right"` | Only respond to right-side modifier keys |
+| `"any"` | Respond to both left and right modifier keys |
 
 This is useful when you want to reserve one side of the keyboard for other shortcuts. For example, use `"right"` to only activate the tool with right-Ctrl/Cmd, leaving left-Ctrl/Cmd free for browser shortcuts.
+
+**Note:** This can also be changed at runtime via the settings UI (gear icon).
 
 ### `setEditorProtocol(protocol)`
 
