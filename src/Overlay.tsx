@@ -38,10 +38,10 @@ export interface ClickToSourceProps {
 
   /**
    * Which modifier key location to respond to.
-   * - "any" (default): Respond to both left and right modifier keys
-   * - "left": Only respond to left-side modifier keys
+   * - "left" (default): Only respond to left-side modifier keys
    * - "right": Only respond to right-side modifier keys
-   * @default "any"
+   * - "any": Respond to both left and right modifier keys
+   * @default "left"
    */
   modifierLocation?: ModifierLocation;
 
@@ -69,6 +69,8 @@ interface SourceLocation {
  * configured to inject source location data.
  */
 const HIGHLIGHT_ENABLED_KEY = "cts_highlight_enabled";
+const EDITOR_PROTOCOL_KEY = "cts_editor_protocol";
+const MODIFIER_LOCATION_KEY = "cts_modifier_location";
 
 /**
  * Check if a key event's location matches the configured modifier location.
@@ -84,8 +86,8 @@ function matchesModifierLocation(e: KeyboardEvent, location: ModifierLocation): 
 }
 
 export function ClickToSource({
-  editorProtocol = "cursor",
-  modifierLocation = "any",
+  editorProtocol: editorProtocolProp = "cursor",
+  modifierLocation: modifierLocationProp = "left",
   children,
 }: ClickToSourceProps) {
   const { clickToSourceEnabled } = useDevTools();
@@ -101,6 +103,17 @@ export function ClickToSource({
     const stored = localStorage.getItem(HIGHLIGHT_ENABLED_KEY);
     return stored === null ? true : stored === "true";
   });
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [currentEditorProtocol, setCurrentEditorProtocol] = useState<EditorProtocol>(() => {
+    if (typeof window === "undefined") return editorProtocolProp;
+    const stored = localStorage.getItem(EDITOR_PROTOCOL_KEY) as EditorProtocol | null;
+    return stored ?? editorProtocolProp;
+  });
+  const [currentModifierLocation, setCurrentModifierLocation] = useState<ModifierLocation>(() => {
+    if (typeof window === "undefined") return modifierLocationProp;
+    const stored = localStorage.getItem(MODIFIER_LOCATION_KEY) as ModifierLocation | null;
+    return stored ?? modifierLocationProp;
+  });
   const metaDown = useRef(false);
   const ctrlDown = useRef(false);
   const altDown = useRef(false);
@@ -112,6 +125,20 @@ export function ClickToSource({
       localStorage.setItem(HIGHLIGHT_ENABLED_KEY, String(next));
       return next;
     });
+  }, []);
+
+  const toggleSettings = useCallback(() => {
+    setSettingsOpen((v) => !v);
+  }, []);
+
+  const handleEditorChange = useCallback((protocol: EditorProtocol) => {
+    setCurrentEditorProtocol(protocol);
+    localStorage.setItem(EDITOR_PROTOCOL_KEY, protocol);
+  }, []);
+
+  const handleModifierLocationChange = useCallback((location: ModifierLocation) => {
+    setCurrentModifierLocation(location);
+    localStorage.setItem(MODIFIER_LOCATION_KEY, location);
   }, []);
 
   const deactivate = useCallback(() => {
@@ -163,7 +190,7 @@ export function ClickToSource({
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!matchesModifierLocation(e, modifierLocation)) return;
+      if (!matchesModifierLocation(e, currentModifierLocation)) return;
       if (e.key === "Meta") metaDown.current = true;
       if (e.key === "Control") ctrlDown.current = true;
       if (e.key === "Alt") altDown.current = true;
@@ -171,7 +198,7 @@ export function ClickToSource({
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (!matchesModifierLocation(e, modifierLocation)) return;
+      if (!matchesModifierLocation(e, currentModifierLocation)) return;
       if (e.key === "Meta") metaDown.current = false;
       if (e.key === "Control") ctrlDown.current = false;
       if (e.key === "Alt") altDown.current = false;
@@ -192,7 +219,7 @@ export function ClickToSource({
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
     };
-  }, [clickToSourceEnabled, highlightEnabled, deactivate, modifierLocation]);
+  }, [clickToSourceEnabled, highlightEnabled, deactivate, currentModifierLocation]);
 
   // Track hovered element and mouse position (only when active and highlighting enabled)
   useEffect(() => {
@@ -254,10 +281,10 @@ export function ClickToSource({
         console.log("[ClickToSource] Copied to clipboard:\n", snippet);
       } else {
         // Ctrl = editor mode
-        openInEditor(editorProtocol, sourceLocation);
+        openInEditor(currentEditorProtocol, sourceLocation);
       }
     },
-    [clickToSourceEnabled, highlightEnabled, hoveredElement, editorProtocol]
+    [clickToSourceEnabled, highlightEnabled, hoveredElement, currentEditorProtocol]
   );
 
   useEffect(() => {
@@ -279,7 +306,21 @@ export function ClickToSource({
       {children}
       {clickToSourceEnabled && highlightEnabled && isActive && <FullScreenCrosshairs x={mousePos.x} y={mousePos.y} mode={mode} targetLevel={targetLevel} />}
       {showBadges && <InspectorBadges element={hoveredElement} mode={mode} targetLevel={targetLevel} />}
-      {clickToSourceEnabled && isActive && <InstructionsOverlay mode={mode} targetLevel={targetLevel} isActive={isActive && highlightEnabled} highlightEnabled={highlightEnabled} onToggle={toggleHighlight} />}
+      {clickToSourceEnabled && isActive && (
+        <InstructionsOverlay
+          mode={mode}
+          targetLevel={targetLevel}
+          isActive={isActive && highlightEnabled}
+          highlightEnabled={highlightEnabled}
+          onToggle={toggleHighlight}
+          settingsOpen={settingsOpen}
+          onToggleSettings={toggleSettings}
+          editorProtocol={currentEditorProtocol}
+          modifierLocation={currentModifierLocation}
+          onEditorChange={handleEditorChange}
+          onModifierLocationChange={handleModifierLocationChange}
+        />
+      )}
     </>
   );
 }
@@ -324,12 +365,24 @@ function InstructionsOverlay({
   isActive,
   highlightEnabled,
   onToggle,
+  settingsOpen,
+  onToggleSettings,
+  editorProtocol,
+  modifierLocation,
+  onEditorChange,
+  onModifierLocationChange,
 }: {
   mode: Mode;
   targetLevel: TargetLevel;
   isActive: boolean;
   highlightEnabled: boolean;
   onToggle: () => void;
+  settingsOpen: boolean;
+  onToggleSettings: () => void;
+  editorProtocol: EditorProtocol;
+  modifierLocation: ModifierLocation;
+  onEditorChange: (protocol: EditorProtocol) => void;
+  onModifierLocationChange: (location: ModifierLocation) => void;
 }) {
   const shortcuts = [
     { keys: ["⌃", "Click"], action: "Open in editor", color: COLOR_PURPLE_50, active: isActive && mode === "editor" && targetLevel === "element" },
@@ -464,6 +517,150 @@ function InstructionsOverlay({
           />
         </div>
       </button>
+      <button
+        data-cts-settings=""
+        onClickCapture={(e) => { e.stopPropagation(); onToggleSettings(); }}
+        onMouseDown={(e) => { e.stopPropagation(); }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 22,
+          height: 22,
+          borderRadius: 10,
+          border: "none",
+          backgroundColor: "rgba(0, 0, 0, 0.85)",
+          backdropFilter: "blur(8px)",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+          cursor: "pointer",
+          pointerEvents: "auto",
+          color: "rgba(255, 255, 255, 0.6)",
+        }}
+        title="Settings"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+      {settingsOpen && (
+        <>
+          <div
+            data-cts-settings-backdrop=""
+            onClick={(e) => { e.stopPropagation(); onToggleSettings(); }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 999998,
+              pointerEvents: "auto",
+            }}
+          />
+          <div
+            style={{
+              position: "fixed",
+              bottom: 44,
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 999999,
+              backgroundColor: "rgba(0, 0, 0, 0.92)",
+              borderRadius: 12,
+              backdropFilter: "blur(12px)",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+              padding: 16,
+              minWidth: 200,
+              pointerEvents: "auto",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "system-ui, -apple-system, sans-serif",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "white",
+                marginBottom: 12,
+              }}
+            >
+              Settings
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label
+                style={{
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  color: "rgba(255, 255, 255, 0.6)",
+                  marginBottom: 4,
+                  display: "block",
+                }}
+              >
+                Editor
+              </label>
+              <select
+                value={editorProtocol}
+                onChange={(e) => onEditorChange(e.target.value as EditorProtocol)}
+                style={{
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: 12,
+                  padding: "6px 8px",
+                  borderRadius: 6,
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  color: "white",
+                  cursor: "pointer",
+                  width: "100%",
+                  appearance: "none",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 8px center",
+                  paddingRight: 28,
+                }}
+              >
+                <option value="vscode">VS Code</option>
+                <option value="cursor">Cursor</option>
+                <option value="zed">Zed</option>
+              </select>
+            </div>
+            <div>
+              <label
+                style={{
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  color: "rgba(255, 255, 255, 0.6)",
+                  marginBottom: 4,
+                  display: "block",
+                }}
+              >
+                Modifier Keys
+              </label>
+              <select
+                value={modifierLocation}
+                onChange={(e) => onModifierLocationChange(e.target.value as ModifierLocation)}
+                style={{
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: 12,
+                  padding: "6px 8px",
+                  borderRadius: 6,
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  color: "white",
+                  cursor: "pointer",
+                  width: "100%",
+                  appearance: "none",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 8px center",
+                  paddingRight: 28,
+                }}
+              >
+                <option value="left">Left side</option>
+                <option value="right">Right side</option>
+                <option value="any">Both sides</option>
+              </select>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

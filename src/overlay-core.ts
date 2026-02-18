@@ -22,9 +22,9 @@ export interface OverlayOptions {
   editorProtocol?: EditorProtocol;
   /**
    * Which modifier key location to respond to.
-   * - "any" (default): Respond to both left and right modifier keys
-   * - "left": Only respond to left-side modifier keys
+   * - "left" (default): Only respond to left-side modifier keys
    * - "right": Only respond to right-side modifier keys
+   * - "any": Respond to both left and right modifier keys
    */
   modifierLocation?: ModifierLocation;
   onActivate?: () => void;
@@ -46,6 +46,8 @@ const COLOR_BLUE_100 = "#3468A0";
 const COLOR_BLUE_0 = "#E8F0F8";
 
 const HIGHLIGHT_ENABLED_KEY = "cts_highlight_enabled";
+const EDITOR_PROTOCOL_KEY = "cts_editor_protocol";
+const MODIFIER_LOCATION_KEY = "cts_modifier_location";
 const CURSOR_STYLE_ID = "cts-hide-cursor";
 const OVERLAY_CONTAINER_ID = "cts-overlay-container";
 
@@ -79,6 +81,7 @@ export class ClickToSourceOverlay {
   private hoveredElement: HTMLElement | null = null;
   private mousePos = { x: 0, y: 0 };
   private highlightEnabled: boolean;
+  private settingsOpen = false;
   private metaDown = false;
   private ctrlDown = false;
   private altDown = false;
@@ -94,8 +97,12 @@ export class ClickToSourceOverlay {
   private boundBlur: () => void;
 
   constructor(options: OverlayOptions = {}) {
-    this.editorProtocol = options.editorProtocol ?? "vscode";
-    this.modifierLocation = options.modifierLocation ?? "any";
+    // Load from localStorage with props as override
+    const storedEditor = localStorage.getItem(EDITOR_PROTOCOL_KEY) as EditorProtocol | null;
+    const storedModifier = localStorage.getItem(MODIFIER_LOCATION_KEY) as ModifierLocation | null;
+
+    this.editorProtocol = options.editorProtocol ?? storedEditor ?? "vscode";
+    this.modifierLocation = options.modifierLocation ?? storedModifier ?? "left";
     this.onActivate = options.onActivate;
     this.onDeactivate = options.onDeactivate;
 
@@ -132,10 +139,17 @@ export class ClickToSourceOverlay {
 
   setEditorProtocol(protocol: EditorProtocol): void {
     this.editorProtocol = protocol;
+    localStorage.setItem(EDITOR_PROTOCOL_KEY, protocol);
   }
 
   setModifierLocation(location: ModifierLocation): void {
     this.modifierLocation = location;
+    localStorage.setItem(MODIFIER_LOCATION_KEY, location);
+  }
+
+  toggleSettings(): void {
+    this.settingsOpen = !this.settingsOpen;
+    this.render();
   }
 
   private createContainer(): void {
@@ -361,6 +375,44 @@ export class ClickToSourceOverlay {
         this.toggleHighlight();
       });
     }
+
+    // Attach settings button handler
+    const settingsBtn = this.container.querySelector("[data-cts-settings]");
+    if (settingsBtn) {
+      settingsBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.toggleSettings();
+      });
+    }
+
+    // Attach settings backdrop handler (close on click outside)
+    const backdrop = this.container.querySelector("[data-cts-settings-backdrop]");
+    if (backdrop) {
+      backdrop.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.toggleSettings();
+      });
+    }
+
+    // Attach editor select handler
+    const editorSelect = this.container.querySelector("[data-cts-editor-select]");
+    if (editorSelect) {
+      editorSelect.addEventListener("change", (e) => {
+        e.stopPropagation();
+        const value = (e.target as HTMLSelectElement).value as EditorProtocol;
+        this.setEditorProtocol(value);
+      });
+    }
+
+    // Attach modifier location select handler
+    const modifierSelect = this.container.querySelector("[data-cts-modifier-select]");
+    if (modifierSelect) {
+      modifierSelect.addEventListener("change", (e) => {
+        e.stopPropagation();
+        const value = (e.target as HTMLSelectElement).value as ModifierLocation;
+        this.setModifierLocation(value);
+      });
+    }
   }
 
   private renderInstructions(): string {
@@ -391,6 +443,9 @@ export class ClickToSourceOverlay {
     const toggleKnobLeft = this.highlightEnabled ? 16 : 2;
     const toggleBg = this.highlightEnabled ? COLOR_PURPLE_50 : "rgba(255,255,255,0.15)";
 
+    // Settings gear icon SVG
+    const gearIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`;
+
     return `
       <div style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:999999;display:flex;align-items:center;gap:6px;">
         <div style="display:flex;gap:4px;padding:4px;background-color:rgba(0,0,0,0.85);border-radius:10px;backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,0.3);pointer-events:none;opacity:${this.highlightEnabled ? 1 : 0.5};transition:opacity 0.15s;">
@@ -401,6 +456,42 @@ export class ClickToSourceOverlay {
             <div style="position:absolute;top:2px;left:${toggleKnobLeft}px;width:10px;height:10px;border-radius:5px;background-color:white;transition:left 0.15s;"></div>
           </div>
         </button>
+        <button data-cts-settings style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:10px;border:none;background-color:rgba(0,0,0,0.85);backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,0.3);cursor:pointer;pointer-events:auto;color:rgba(255,255,255,0.6);" title="Settings">
+          ${gearIcon}
+        </button>
+      </div>
+      ${this.renderSettingsDialog()}
+    `;
+  }
+
+  private renderSettingsDialog(): string {
+    if (!this.settingsOpen) return "";
+
+    const selectStyle = `font-family:system-ui,-apple-system,sans-serif;font-size:12px;padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background-color:rgba(255,255,255,0.1);color:white;cursor:pointer;width:100%;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:28px;`;
+    const labelStyle = `font-family:system-ui,-apple-system,sans-serif;font-size:11px;font-weight:500;color:rgba(255,255,255,0.6);margin-bottom:4px;display:block;`;
+
+    return `
+      <div data-cts-settings-backdrop style="position:fixed;inset:0;z-index:999998;pointer-events:auto;"></div>
+      <div style="position:fixed;bottom:44px;left:50%;transform:translateX(-50%);z-index:999999;background-color:rgba(0,0,0,0.92);border-radius:12px;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,0.4);padding:16px;min-width:200px;pointer-events:auto;">
+        <div style="font-family:system-ui,-apple-system,sans-serif;font-size:13px;font-weight:600;color:white;margin-bottom:12px;">Settings</div>
+
+        <div style="margin-bottom:12px;">
+          <label style="${labelStyle}">Editor</label>
+          <select data-cts-editor-select style="${selectStyle}">
+            <option value="vscode" ${this.editorProtocol === "vscode" ? "selected" : ""}>VS Code</option>
+            <option value="cursor" ${this.editorProtocol === "cursor" ? "selected" : ""}>Cursor</option>
+            <option value="zed" ${this.editorProtocol === "zed" ? "selected" : ""}>Zed</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="${labelStyle}">Modifier Keys</label>
+          <select data-cts-modifier-select style="${selectStyle}">
+            <option value="left" ${this.modifierLocation === "left" ? "selected" : ""}>Left side</option>
+            <option value="right" ${this.modifierLocation === "right" ? "selected" : ""}>Right side</option>
+            <option value="any" ${this.modifierLocation === "any" ? "selected" : ""}>Both sides</option>
+          </select>
+        </div>
       </div>
     `;
   }
