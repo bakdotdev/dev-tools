@@ -225,6 +225,8 @@ function showCursor() {
   document.getElementById(CURSOR_STYLE_ID)?.remove();
 }
 var HIGHLIGHT_ENABLED_KEY = "cts_highlight_enabled";
+var EDITOR_PROTOCOL_KEY = "cts_editor_protocol";
+var MODIFIER_LOCATION_KEY = "cts_modifier_location";
 function matchesModifierLocation(e, location) {
   if (location === "any") return true;
   if (location === "left") return e.location === 1;
@@ -232,8 +234,8 @@ function matchesModifierLocation(e, location) {
   return true;
 }
 function ClickToSource({
-  editorProtocol = "cursor",
-  modifierLocation = "any",
+  editorProtocol: editorProtocolProp = "cursor",
+  modifierLocation: modifierLocationProp = "left",
   children
 }) {
   const { clickToSourceEnabled } = useDevTools();
@@ -249,6 +251,17 @@ function ClickToSource({
     const stored = localStorage.getItem(HIGHLIGHT_ENABLED_KEY);
     return stored === null ? true : stored === "true";
   });
+  const [settingsOpen, setSettingsOpen] = useState2(false);
+  const [currentEditorProtocol, setCurrentEditorProtocol] = useState2(() => {
+    if (typeof window === "undefined") return editorProtocolProp;
+    const stored = localStorage.getItem(EDITOR_PROTOCOL_KEY);
+    return stored ?? editorProtocolProp;
+  });
+  const [currentModifierLocation, setCurrentModifierLocation] = useState2(() => {
+    if (typeof window === "undefined") return modifierLocationProp;
+    const stored = localStorage.getItem(MODIFIER_LOCATION_KEY);
+    return stored ?? modifierLocationProp;
+  });
   const metaDown = useRef(false);
   const ctrlDown = useRef(false);
   const altDown = useRef(false);
@@ -259,6 +272,17 @@ function ClickToSource({
       localStorage.setItem(HIGHLIGHT_ENABLED_KEY, String(next));
       return next;
     });
+  }, []);
+  const toggleSettings = useCallback2(() => {
+    setSettingsOpen((v) => !v);
+  }, []);
+  const handleEditorChange = useCallback2((protocol) => {
+    setCurrentEditorProtocol(protocol);
+    localStorage.setItem(EDITOR_PROTOCOL_KEY, protocol);
+  }, []);
+  const handleModifierLocationChange = useCallback2((location) => {
+    setCurrentModifierLocation(location);
+    localStorage.setItem(MODIFIER_LOCATION_KEY, location);
   }, []);
   const deactivate = useCallback2(() => {
     metaDown.current = false;
@@ -300,14 +324,14 @@ function ClickToSource({
       setTargetLevel(altDown.current ? "parent" : "element");
     };
     const handleKeyDown = (e) => {
-      if (!matchesModifierLocation(e, modifierLocation)) return;
+      if (!matchesModifierLocation(e, currentModifierLocation)) return;
       if (e.key === "Meta") metaDown.current = true;
       if (e.key === "Control") ctrlDown.current = true;
       if (e.key === "Alt") altDown.current = true;
       updateState();
     };
     const handleKeyUp = (e) => {
-      if (!matchesModifierLocation(e, modifierLocation)) return;
+      if (!matchesModifierLocation(e, currentModifierLocation)) return;
       if (e.key === "Meta") metaDown.current = false;
       if (e.key === "Control") ctrlDown.current = false;
       if (e.key === "Alt") altDown.current = false;
@@ -324,7 +348,7 @@ function ClickToSource({
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
     };
-  }, [clickToSourceEnabled, highlightEnabled, deactivate, modifierLocation]);
+  }, [clickToSourceEnabled, highlightEnabled, deactivate, currentModifierLocation]);
   useEffect2(() => {
     if (!clickToSourceEnabled || !isActive || !highlightEnabled) {
       setHoveredElement(null);
@@ -365,10 +389,10 @@ function ClickToSource({
         await navigator.clipboard.writeText(snippet);
         console.log("[ClickToSource] Copied to clipboard:\n", snippet);
       } else {
-        openInEditor(editorProtocol, sourceLocation);
+        openInEditor(currentEditorProtocol, sourceLocation);
       }
     },
-    [clickToSourceEnabled, highlightEnabled, hoveredElement, editorProtocol]
+    [clickToSourceEnabled, highlightEnabled, hoveredElement, currentEditorProtocol]
   );
   useEffect2(() => {
     document.addEventListener("click", handleClick, true);
@@ -383,7 +407,22 @@ function ClickToSource({
     children,
     clickToSourceEnabled && highlightEnabled && isActive && /* @__PURE__ */ jsx2(FullScreenCrosshairs, { x: mousePos.x, y: mousePos.y, mode, targetLevel }),
     showBadges && /* @__PURE__ */ jsx2(InspectorBadges, { element: hoveredElement, mode, targetLevel }),
-    clickToSourceEnabled && isActive && /* @__PURE__ */ jsx2(InstructionsOverlay, { mode, targetLevel, isActive: isActive && highlightEnabled, highlightEnabled, onToggle: toggleHighlight })
+    clickToSourceEnabled && isActive && /* @__PURE__ */ jsx2(
+      InstructionsOverlay,
+      {
+        mode,
+        targetLevel,
+        isActive: isActive && highlightEnabled,
+        highlightEnabled,
+        onToggle: toggleHighlight,
+        settingsOpen,
+        onToggleSettings: toggleSettings,
+        editorProtocol: currentEditorProtocol,
+        modifierLocation: currentModifierLocation,
+        onEditorChange: handleEditorChange,
+        onModifierLocationChange: handleModifierLocationChange
+      }
+    )
   ] });
 }
 var COLOR_PURPLE_50 = "#715CC7";
@@ -409,7 +448,13 @@ function InstructionsOverlay({
   targetLevel,
   isActive,
   highlightEnabled,
-  onToggle
+  onToggle,
+  settingsOpen,
+  onToggleSettings,
+  editorProtocol,
+  modifierLocation,
+  onEditorChange,
+  onModifierLocationChange
 }) {
   const shortcuts = [
     { keys: ["\u2303", "Click"], action: "Open in editor", color: COLOR_PURPLE_50, active: isActive && mode === "editor" && targetLevel === "element" },
@@ -557,7 +602,180 @@ function InstructionsOverlay({
               }
             )
           }
-        )
+        ),
+        /* @__PURE__ */ jsx2(
+          "button",
+          {
+            "data-cts-settings": "",
+            onClickCapture: (e) => {
+              e.stopPropagation();
+              onToggleSettings();
+            },
+            onMouseDown: (e) => {
+              e.stopPropagation();
+            },
+            style: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 22,
+              height: 22,
+              borderRadius: 10,
+              border: "none",
+              backgroundColor: "rgba(0, 0, 0, 0.85)",
+              backdropFilter: "blur(8px)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              cursor: "pointer",
+              pointerEvents: "auto",
+              color: "rgba(255, 255, 255, 0.6)"
+            },
+            title: "Settings",
+            children: /* @__PURE__ */ jsxs("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+              /* @__PURE__ */ jsx2("circle", { cx: "12", cy: "12", r: "3" }),
+              /* @__PURE__ */ jsx2("path", { d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" })
+            ] })
+          }
+        ),
+        settingsOpen && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx2(
+            "div",
+            {
+              "data-cts-settings-backdrop": "",
+              onClick: (e) => {
+                e.stopPropagation();
+                onToggleSettings();
+              },
+              style: {
+                position: "fixed",
+                inset: 0,
+                zIndex: 999998,
+                pointerEvents: "auto"
+              }
+            }
+          ),
+          /* @__PURE__ */ jsxs(
+            "div",
+            {
+              style: {
+                position: "fixed",
+                bottom: 44,
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 999999,
+                backgroundColor: "rgba(0, 0, 0, 0.92)",
+                borderRadius: 12,
+                backdropFilter: "blur(12px)",
+                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+                padding: 16,
+                minWidth: 200,
+                pointerEvents: "auto"
+              },
+              children: [
+                /* @__PURE__ */ jsx2(
+                  "div",
+                  {
+                    style: {
+                      fontFamily: "system-ui, -apple-system, sans-serif",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "white",
+                      marginBottom: 12
+                    },
+                    children: "Settings"
+                  }
+                ),
+                /* @__PURE__ */ jsxs("div", { style: { marginBottom: 12 }, children: [
+                  /* @__PURE__ */ jsx2(
+                    "label",
+                    {
+                      style: {
+                        fontFamily: "system-ui, -apple-system, sans-serif",
+                        fontSize: 11,
+                        fontWeight: 500,
+                        color: "rgba(255, 255, 255, 0.6)",
+                        marginBottom: 4,
+                        display: "block"
+                      },
+                      children: "Editor"
+                    }
+                  ),
+                  /* @__PURE__ */ jsxs(
+                    "select",
+                    {
+                      value: editorProtocol,
+                      onChange: (e) => onEditorChange(e.target.value),
+                      style: {
+                        fontFamily: "system-ui, -apple-system, sans-serif",
+                        fontSize: 12,
+                        padding: "6px 8px",
+                        borderRadius: 6,
+                        border: "1px solid rgba(255, 255, 255, 0.15)",
+                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                        color: "white",
+                        cursor: "pointer",
+                        width: "100%",
+                        appearance: "none",
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 8px center",
+                        paddingRight: 28
+                      },
+                      children: [
+                        /* @__PURE__ */ jsx2("option", { value: "vscode", children: "VS Code" }),
+                        /* @__PURE__ */ jsx2("option", { value: "cursor", children: "Cursor" }),
+                        /* @__PURE__ */ jsx2("option", { value: "zed", children: "Zed" })
+                      ]
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ jsxs("div", { children: [
+                  /* @__PURE__ */ jsx2(
+                    "label",
+                    {
+                      style: {
+                        fontFamily: "system-ui, -apple-system, sans-serif",
+                        fontSize: 11,
+                        fontWeight: 500,
+                        color: "rgba(255, 255, 255, 0.6)",
+                        marginBottom: 4,
+                        display: "block"
+                      },
+                      children: "Modifier Keys"
+                    }
+                  ),
+                  /* @__PURE__ */ jsxs(
+                    "select",
+                    {
+                      value: modifierLocation,
+                      onChange: (e) => onModifierLocationChange(e.target.value),
+                      style: {
+                        fontFamily: "system-ui, -apple-system, sans-serif",
+                        fontSize: 12,
+                        padding: "6px 8px",
+                        borderRadius: 6,
+                        border: "1px solid rgba(255, 255, 255, 0.15)",
+                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                        color: "white",
+                        cursor: "pointer",
+                        width: "100%",
+                        appearance: "none",
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 8px center",
+                        paddingRight: 28
+                      },
+                      children: [
+                        /* @__PURE__ */ jsx2("option", { value: "left", children: "Left side" }),
+                        /* @__PURE__ */ jsx2("option", { value: "right", children: "Right side" }),
+                        /* @__PURE__ */ jsx2("option", { value: "any", children: "Both sides" })
+                      ]
+                    }
+                  )
+                ] })
+              ]
+            }
+          )
+        ] })
       ]
     }
   );
