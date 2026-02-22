@@ -392,33 +392,153 @@ function InstructionsOverlay({
   ];
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: 8,
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 999999,
-        display: "flex",
-        alignItems: "center",
-        gap: 6,
-      }}
-    >
+    <>
+      {/* Backdrop and dialog rendered OUTSIDE the bar so z-index works correctly */}
+      {settingsOpen && (
+        <>
+          <div
+            data-cts-settings-backdrop=""
+            onClick={(e) => { e.stopPropagation(); onToggleSettings(); }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 999997,
+              pointerEvents: "auto",
+            }}
+          />
+          <div
+            style={{
+              position: "fixed",
+              bottom: 44,
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 999998,
+              backgroundColor: "rgba(0, 0, 0, 0.92)",
+              borderRadius: 12,
+              backdropFilter: "blur(12px)",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+              padding: 16,
+              minWidth: 200,
+              pointerEvents: "auto",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "system-ui, -apple-system, sans-serif",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "white",
+                marginBottom: 12,
+              }}
+            >
+              Settings
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label
+                style={{
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  color: "rgba(255, 255, 255, 0.6)",
+                  marginBottom: 4,
+                  display: "block",
+                }}
+              >
+                Editor
+              </label>
+              <select
+                value={editorProtocol}
+                onChange={(e) => onEditorChange(e.target.value as EditorProtocol)}
+                style={{
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: 12,
+                  padding: "6px 8px",
+                  borderRadius: 6,
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  color: "white",
+                  cursor: "pointer",
+                  width: "100%",
+                  appearance: "none",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 8px center",
+                  paddingRight: 28,
+                }}
+              >
+                <option value="vscode">VS Code</option>
+                <option value="cursor">Cursor</option>
+                <option value="zed">Zed</option>
+              </select>
+            </div>
+            <div>
+              <label
+                style={{
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  color: "rgba(255, 255, 255, 0.6)",
+                  marginBottom: 4,
+                  display: "block",
+                }}
+              >
+                Modifier Keys
+              </label>
+              <select
+                value={modifierLocation}
+                onChange={(e) => onModifierLocationChange(e.target.value as ModifierLocation)}
+                style={{
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: 12,
+                  padding: "6px 8px",
+                  borderRadius: 6,
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  color: "white",
+                  cursor: "pointer",
+                  width: "100%",
+                  appearance: "none",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 8px center",
+                  paddingRight: 28,
+                }}
+              >
+                <option value="left">Left side</option>
+                <option value="right">Right side</option>
+                <option value="any">Both sides</option>
+              </select>
+            </div>
+          </div>
+        </>
+      )}
       <div
         style={{
+          position: "fixed",
+          bottom: 8,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 999999,
           display: "flex",
-          gap: 4,
-          padding: 4,
-          backgroundColor: "rgba(0, 0, 0, 0.85)",
-          borderRadius: 10,
-          backdropFilter: "blur(8px)",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-          pointerEvents: "none",
-          opacity: highlightEnabled ? 1 : 0.5,
-          transition: "opacity 0.15s",
+          alignItems: "center",
+          gap: 6,
         }}
       >
-        {shortcuts.map((shortcut, i) => (
+        <div
+          style={{
+            display: "flex",
+            gap: 4,
+            padding: 4,
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            borderRadius: 10,
+            backdropFilter: "blur(8px)",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+            pointerEvents: "none",
+            opacity: highlightEnabled ? 1 : 0.5,
+            transition: "opacity 0.15s",
+          }}
+        >
+          {shortcuts.map((shortcut, i) => (
           <div
             key={i}
             style={{
@@ -543,125 +663,8 @@ function InstructionsOverlay({
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
         </svg>
       </button>
-      {settingsOpen && (
-        <>
-          <div
-            data-cts-settings-backdrop=""
-            onClick={(e) => { e.stopPropagation(); onToggleSettings(); }}
-            style={{
-              position: "fixed",
-              inset: 0,
-              zIndex: 999998,
-              pointerEvents: "auto",
-            }}
-          />
-          <div
-            style={{
-              position: "fixed",
-              bottom: 44,
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 999999,
-              backgroundColor: "rgba(0, 0, 0, 0.92)",
-              borderRadius: 12,
-              backdropFilter: "blur(12px)",
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
-              padding: 16,
-              minWidth: 200,
-              pointerEvents: "auto",
-            }}
-          >
-            <div
-              style={{
-                fontFamily: "system-ui, -apple-system, sans-serif",
-                fontSize: 13,
-                fontWeight: 600,
-                color: "white",
-                marginBottom: 12,
-              }}
-            >
-              Settings
-            </div>
-            <div style={{ marginBottom: 12 }}>
-              <label
-                style={{
-                  fontFamily: "system-ui, -apple-system, sans-serif",
-                  fontSize: 11,
-                  fontWeight: 500,
-                  color: "rgba(255, 255, 255, 0.6)",
-                  marginBottom: 4,
-                  display: "block",
-                }}
-              >
-                Editor
-              </label>
-              <select
-                value={editorProtocol}
-                onChange={(e) => onEditorChange(e.target.value as EditorProtocol)}
-                style={{
-                  fontFamily: "system-ui, -apple-system, sans-serif",
-                  fontSize: 12,
-                  padding: "6px 8px",
-                  borderRadius: 6,
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  color: "white",
-                  cursor: "pointer",
-                  width: "100%",
-                  appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 8px center",
-                  paddingRight: 28,
-                }}
-              >
-                <option value="vscode">VS Code</option>
-                <option value="cursor">Cursor</option>
-                <option value="zed">Zed</option>
-              </select>
-            </div>
-            <div>
-              <label
-                style={{
-                  fontFamily: "system-ui, -apple-system, sans-serif",
-                  fontSize: 11,
-                  fontWeight: 500,
-                  color: "rgba(255, 255, 255, 0.6)",
-                  marginBottom: 4,
-                  display: "block",
-                }}
-              >
-                Modifier Keys
-              </label>
-              <select
-                value={modifierLocation}
-                onChange={(e) => onModifierLocationChange(e.target.value as ModifierLocation)}
-                style={{
-                  fontFamily: "system-ui, -apple-system, sans-serif",
-                  fontSize: 12,
-                  padding: "6px 8px",
-                  borderRadius: 6,
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  color: "white",
-                  cursor: "pointer",
-                  width: "100%",
-                  appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 8px center",
-                  paddingRight: 28,
-                }}
-              >
-                <option value="left">Left side</option>
-                <option value="right">Right side</option>
-                <option value="any">Both sides</option>
-              </select>
-            </div>
-          </div>
-        </>
-      )}
     </div>
+    </>
   );
 }
 

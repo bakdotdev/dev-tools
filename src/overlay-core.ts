@@ -84,7 +84,7 @@ export class ClickToSourceOverlay {
   private settingsOpen = false;
   private metaDown = false;
   private ctrlDown = false;
-  private altDown = false;
+  private shiftDown = false;
   private container: HTMLElement | null = null;
   private onActivate?: () => void;
   private onDeactivate?: () => void;
@@ -236,7 +236,7 @@ export class ClickToSourceOverlay {
     if (!this.matchesModifierLocation(e)) return;
     if (e.key === "Meta") this.metaDown = true;
     if (e.key === "Control") this.ctrlDown = true;
-    if (e.key === "Alt") this.altDown = true;
+    if (e.key === "Shift") this.shiftDown = true;
     this.updateState();
   }
 
@@ -244,7 +244,7 @@ export class ClickToSourceOverlay {
     if (!this.matchesModifierLocation(e)) return;
     if (e.key === "Meta") this.metaDown = false;
     if (e.key === "Control") this.ctrlDown = false;
-    if (e.key === "Alt") this.altDown = false;
+    if (e.key === "Shift") this.shiftDown = false;
     this.updateState();
   }
 
@@ -263,7 +263,7 @@ export class ClickToSourceOverlay {
   private handleBlur(): void {
     this.metaDown = false;
     this.ctrlDown = false;
-    this.altDown = false;
+    this.shiftDown = false;
     this.deactivate();
   }
 
@@ -282,7 +282,7 @@ export class ClickToSourceOverlay {
     // Skip clicks on the toggle button
     if (target.closest("[data-cts-toggle]")) return;
 
-    const skip = this.altDown ? 1 : 0;
+    const skip = this.shiftDown ? 1 : 0;
     const locations = this.getAllSourceLocations(target);
     const locationWithElement = locations[skip] ?? locations[locations.length - 1];
 
@@ -314,7 +314,7 @@ export class ClickToSourceOverlay {
     if (active && !this.isActive) {
       this.isActive = true;
       this.mode = this.metaDown ? "copy" : "editor";
-      this.targetLevel = this.altDown ? "parent" : "element";
+      this.targetLevel = this.shiftDown ? "parent" : "element";
       if (this.highlightEnabled) {
         this.hideCursor();
         const el = document.elementFromPoint(this.mousePos.x, this.mousePos.y) as HTMLElement | null;
@@ -326,7 +326,7 @@ export class ClickToSourceOverlay {
       this.deactivate();
     } else if (active) {
       this.mode = this.metaDown ? "copy" : "editor";
-      this.targetLevel = this.altDown ? "parent" : "element";
+      this.targetLevel = this.shiftDown ? "parent" : "element";
       this.render();
     }
   }
@@ -411,9 +411,9 @@ export class ClickToSourceOverlay {
   private renderInstructions(): string {
     const shortcuts = [
       { keys: ["⌃", "Click"], action: "Open in editor", color: COLOR_PURPLE_50, active: this.isActive && this.mode === "editor" && this.targetLevel === "element" },
-      { keys: ["⌃", "⌥", "Click"], action: "Open parent in editor", color: COLOR_BLUE_50, active: this.isActive && this.mode === "editor" && this.targetLevel === "parent" },
+      { keys: ["⌃", "⇧", "Click"], action: "Open parent in editor", color: COLOR_BLUE_50, active: this.isActive && this.mode === "editor" && this.targetLevel === "parent" },
       { keys: ["⌘", "Click"], action: "Copy snippet", color: COLOR_ORANGE_50, active: this.isActive && this.mode === "copy" && this.targetLevel === "element" },
-      { keys: ["⌘", "⌥", "Click"], action: "Copy parent snippet", color: COLOR_GREEN_50, active: this.isActive && this.mode === "copy" && this.targetLevel === "parent" },
+      { keys: ["⌘", "⇧", "Click"], action: "Copy parent snippet", color: COLOR_GREEN_50, active: this.isActive && this.mode === "copy" && this.targetLevel === "parent" },
     ];
 
     const shortcutHtml = shortcuts.map(s => {

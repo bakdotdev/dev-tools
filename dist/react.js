@@ -462,323 +462,325 @@ function InstructionsOverlay({
     { keys: ["\u2318", "Click"], action: "Copy snippet", color: COLOR_ORANGE_50, active: isActive && mode === "copy" && targetLevel === "element" },
     { keys: ["\u2318", "\u2325", "Click"], action: "Copy parent snippet", color: COLOR_GREEN_50, active: isActive && mode === "copy" && targetLevel === "parent" }
   ];
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      style: {
-        position: "fixed",
-        bottom: 8,
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 999999,
-        display: "flex",
-        alignItems: "center",
-        gap: 6
-      },
-      children: [
-        /* @__PURE__ */ jsx2(
-          "div",
-          {
-            style: {
-              display: "flex",
-              gap: 4,
-              padding: 4,
-              backgroundColor: "rgba(0, 0, 0, 0.85)",
-              borderRadius: 10,
-              backdropFilter: "blur(8px)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-              pointerEvents: "none",
-              opacity: highlightEnabled ? 1 : 0.5,
-              transition: "opacity 0.15s"
-            },
-            children: shortcuts.map((shortcut, i) => /* @__PURE__ */ jsxs(
-              "div",
-              {
-                style: {
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "2px 4px 2px 2px",
-                  borderRadius: 4,
-                  backgroundColor: shortcut.active ? "rgba(255, 255, 255, 0.1)" : "transparent",
-                  transition: "background-color 0.15s"
-                },
-                children: [
-                  /* @__PURE__ */ jsx2("div", { style: { display: "flex", alignItems: "center", gap: 3 }, children: shortcut.keys.map((key, j) => /* @__PURE__ */ jsx2(
-                    "kbd",
-                    {
-                      style: {
-                        fontFamily: "system-ui, -apple-system, sans-serif",
-                        fontSize: 11,
-                        fontWeight: 600,
-                        lineHeight: 1,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: 20,
-                        ...key === "Click" ? { paddingLeft: 6, paddingRight: 6 } : { width: 20 },
-                        textAlign: "center",
-                        backgroundColor: shortcut.active ? shortcut.color : "rgba(255, 255, 255, 0.12)",
-                        color: shortcut.active ? "white" : "rgba(255, 255, 255, 0.55)",
-                        borderRadius: 2,
-                        border: `1px solid ${shortcut.active ? "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 0.08)"}`,
-                        transition: "background-color 0.15s, color 0.15s"
-                      },
-                      children: key
-                    },
-                    j
-                  )) }),
-                  /* @__PURE__ */ jsx2(
-                    "span",
-                    {
-                      style: {
-                        fontFamily: "system-ui, -apple-system, sans-serif",
-                        fontSize: 11,
-                        fontWeight: 500,
-                        color: shortcut.active ? "rgba(255, 255, 255, 0.95)" : "rgba(255, 255, 255, 0.4)",
-                        whiteSpace: "nowrap",
-                        transition: "color 0.15s"
-                      },
-                      children: shortcut.action
-                    }
-                  )
-                ]
-              },
-              i
-            ))
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    settingsOpen && /* @__PURE__ */ jsxs(Fragment, { children: [
+      /* @__PURE__ */ jsx2(
+        "div",
+        {
+          "data-cts-settings-backdrop": "",
+          onClick: (e) => {
+            e.stopPropagation();
+            onToggleSettings();
+          },
+          style: {
+            position: "fixed",
+            inset: 0,
+            zIndex: 999997,
+            pointerEvents: "auto"
           }
-        ),
-        /* @__PURE__ */ jsx2(
-          "button",
-          {
-            "data-cts-toggle": "",
-            onClickCapture: (e) => {
-              e.stopPropagation();
-              onToggle();
-            },
-            onMouseDown: (e) => {
-              e.stopPropagation();
-            },
-            style: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 4,
-              borderRadius: 10,
-              border: "none",
-              backgroundColor: "rgba(0, 0, 0, 0.85)",
-              backdropFilter: "blur(8px)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-              cursor: "pointer",
-              pointerEvents: "auto"
-            },
-            title: highlightEnabled ? "Disable highlighting" : "Enable highlighting",
-            children: /* @__PURE__ */ jsx2(
+        }
+      ),
+      /* @__PURE__ */ jsxs(
+        "div",
+        {
+          style: {
+            position: "fixed",
+            bottom: 44,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 999998,
+            backgroundColor: "rgba(0, 0, 0, 0.92)",
+            borderRadius: 12,
+            backdropFilter: "blur(12px)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+            padding: 16,
+            minWidth: 200,
+            pointerEvents: "auto"
+          },
+          children: [
+            /* @__PURE__ */ jsx2(
               "div",
               {
                 style: {
-                  position: "relative",
-                  width: 28,
-                  height: 14,
-                  borderRadius: 7,
-                  backgroundColor: highlightEnabled ? COLOR_PURPLE_50 : "rgba(255, 255, 255, 0.15)",
-                  transition: "background-color 0.15s"
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "white",
+                  marginBottom: 12
                 },
-                children: /* @__PURE__ */ jsx2(
-                  "div",
-                  {
-                    style: {
-                      position: "absolute",
-                      top: 2,
-                      left: highlightEnabled ? 16 : 2,
-                      width: 10,
-                      height: 10,
-                      borderRadius: 5,
-                      backgroundColor: "white",
-                      transition: "left 0.15s"
-                    }
-                  }
-                )
+                children: "Settings"
               }
-            )
-          }
-        ),
-        /* @__PURE__ */ jsx2(
-          "button",
-          {
-            "data-cts-settings": "",
-            onClickCapture: (e) => {
-              e.stopPropagation();
-              onToggleSettings();
-            },
-            onMouseDown: (e) => {
-              e.stopPropagation();
-            },
-            style: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 22,
-              height: 22,
-              borderRadius: 10,
-              border: "none",
-              backgroundColor: "rgba(0, 0, 0, 0.85)",
-              backdropFilter: "blur(8px)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-              cursor: "pointer",
-              pointerEvents: "auto",
-              color: "rgba(255, 255, 255, 0.6)"
-            },
-            title: "Settings",
-            children: /* @__PURE__ */ jsxs("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-              /* @__PURE__ */ jsx2("circle", { cx: "12", cy: "12", r: "3" }),
-              /* @__PURE__ */ jsx2("path", { d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" })
+            ),
+            /* @__PURE__ */ jsxs("div", { style: { marginBottom: 12 }, children: [
+              /* @__PURE__ */ jsx2(
+                "label",
+                {
+                  style: {
+                    fontFamily: "system-ui, -apple-system, sans-serif",
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: "rgba(255, 255, 255, 0.6)",
+                    marginBottom: 4,
+                    display: "block"
+                  },
+                  children: "Editor"
+                }
+              ),
+              /* @__PURE__ */ jsxs(
+                "select",
+                {
+                  value: editorProtocol,
+                  onChange: (e) => onEditorChange(e.target.value),
+                  style: {
+                    fontFamily: "system-ui, -apple-system, sans-serif",
+                    fontSize: 12,
+                    padding: "6px 8px",
+                    borderRadius: 6,
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    color: "white",
+                    cursor: "pointer",
+                    width: "100%",
+                    appearance: "none",
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 8px center",
+                    paddingRight: 28
+                  },
+                  children: [
+                    /* @__PURE__ */ jsx2("option", { value: "vscode", children: "VS Code" }),
+                    /* @__PURE__ */ jsx2("option", { value: "cursor", children: "Cursor" }),
+                    /* @__PURE__ */ jsx2("option", { value: "zed", children: "Zed" })
+                  ]
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxs("div", { children: [
+              /* @__PURE__ */ jsx2(
+                "label",
+                {
+                  style: {
+                    fontFamily: "system-ui, -apple-system, sans-serif",
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: "rgba(255, 255, 255, 0.6)",
+                    marginBottom: 4,
+                    display: "block"
+                  },
+                  children: "Modifier Keys"
+                }
+              ),
+              /* @__PURE__ */ jsxs(
+                "select",
+                {
+                  value: modifierLocation,
+                  onChange: (e) => onModifierLocationChange(e.target.value),
+                  style: {
+                    fontFamily: "system-ui, -apple-system, sans-serif",
+                    fontSize: 12,
+                    padding: "6px 8px",
+                    borderRadius: 6,
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    color: "white",
+                    cursor: "pointer",
+                    width: "100%",
+                    appearance: "none",
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 8px center",
+                    paddingRight: 28
+                  },
+                  children: [
+                    /* @__PURE__ */ jsx2("option", { value: "left", children: "Left side" }),
+                    /* @__PURE__ */ jsx2("option", { value: "right", children: "Right side" }),
+                    /* @__PURE__ */ jsx2("option", { value: "any", children: "Both sides" })
+                  ]
+                }
+              )
             ] })
-          }
-        ),
-        settingsOpen && /* @__PURE__ */ jsxs(Fragment, { children: [
+          ]
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxs(
+      "div",
+      {
+        style: {
+          position: "fixed",
+          bottom: 8,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 999999,
+          display: "flex",
+          alignItems: "center",
+          gap: 6
+        },
+        children: [
           /* @__PURE__ */ jsx2(
             "div",
             {
-              "data-cts-settings-backdrop": "",
-              onClick: (e) => {
+              style: {
+                display: "flex",
+                gap: 4,
+                padding: 4,
+                backgroundColor: "rgba(0, 0, 0, 0.85)",
+                borderRadius: 10,
+                backdropFilter: "blur(8px)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                pointerEvents: "none",
+                opacity: highlightEnabled ? 1 : 0.5,
+                transition: "opacity 0.15s"
+              },
+              children: shortcuts.map((shortcut, i) => /* @__PURE__ */ jsxs(
+                "div",
+                {
+                  style: {
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "2px 4px 2px 2px",
+                    borderRadius: 4,
+                    backgroundColor: shortcut.active ? "rgba(255, 255, 255, 0.1)" : "transparent",
+                    transition: "background-color 0.15s"
+                  },
+                  children: [
+                    /* @__PURE__ */ jsx2("div", { style: { display: "flex", alignItems: "center", gap: 3 }, children: shortcut.keys.map((key, j) => /* @__PURE__ */ jsx2(
+                      "kbd",
+                      {
+                        style: {
+                          fontFamily: "system-ui, -apple-system, sans-serif",
+                          fontSize: 11,
+                          fontWeight: 600,
+                          lineHeight: 1,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: 20,
+                          ...key === "Click" ? { paddingLeft: 6, paddingRight: 6 } : { width: 20 },
+                          textAlign: "center",
+                          backgroundColor: shortcut.active ? shortcut.color : "rgba(255, 255, 255, 0.12)",
+                          color: shortcut.active ? "white" : "rgba(255, 255, 255, 0.55)",
+                          borderRadius: 2,
+                          border: `1px solid ${shortcut.active ? "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 0.08)"}`,
+                          transition: "background-color 0.15s, color 0.15s"
+                        },
+                        children: key
+                      },
+                      j
+                    )) }),
+                    /* @__PURE__ */ jsx2(
+                      "span",
+                      {
+                        style: {
+                          fontFamily: "system-ui, -apple-system, sans-serif",
+                          fontSize: 11,
+                          fontWeight: 500,
+                          color: shortcut.active ? "rgba(255, 255, 255, 0.95)" : "rgba(255, 255, 255, 0.4)",
+                          whiteSpace: "nowrap",
+                          transition: "color 0.15s"
+                        },
+                        children: shortcut.action
+                      }
+                    )
+                  ]
+                },
+                i
+              ))
+            }
+          ),
+          /* @__PURE__ */ jsx2(
+            "button",
+            {
+              "data-cts-toggle": "",
+              onClickCapture: (e) => {
+                e.stopPropagation();
+                onToggle();
+              },
+              onMouseDown: (e) => {
+                e.stopPropagation();
+              },
+              style: {
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 4,
+                borderRadius: 10,
+                border: "none",
+                backgroundColor: "rgba(0, 0, 0, 0.85)",
+                backdropFilter: "blur(8px)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                cursor: "pointer",
+                pointerEvents: "auto"
+              },
+              title: highlightEnabled ? "Disable highlighting" : "Enable highlighting",
+              children: /* @__PURE__ */ jsx2(
+                "div",
+                {
+                  style: {
+                    position: "relative",
+                    width: 28,
+                    height: 14,
+                    borderRadius: 7,
+                    backgroundColor: highlightEnabled ? COLOR_PURPLE_50 : "rgba(255, 255, 255, 0.15)",
+                    transition: "background-color 0.15s"
+                  },
+                  children: /* @__PURE__ */ jsx2(
+                    "div",
+                    {
+                      style: {
+                        position: "absolute",
+                        top: 2,
+                        left: highlightEnabled ? 16 : 2,
+                        width: 10,
+                        height: 10,
+                        borderRadius: 5,
+                        backgroundColor: "white",
+                        transition: "left 0.15s"
+                      }
+                    }
+                  )
+                }
+              )
+            }
+          ),
+          /* @__PURE__ */ jsx2(
+            "button",
+            {
+              "data-cts-settings": "",
+              onClickCapture: (e) => {
                 e.stopPropagation();
                 onToggleSettings();
               },
-              style: {
-                position: "fixed",
-                inset: 0,
-                zIndex: 999998,
-                pointerEvents: "auto"
-              }
-            }
-          ),
-          /* @__PURE__ */ jsxs(
-            "div",
-            {
-              style: {
-                position: "fixed",
-                bottom: 44,
-                left: "50%",
-                transform: "translateX(-50%)",
-                zIndex: 999999,
-                backgroundColor: "rgba(0, 0, 0, 0.92)",
-                borderRadius: 12,
-                backdropFilter: "blur(12px)",
-                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
-                padding: 16,
-                minWidth: 200,
-                pointerEvents: "auto"
+              onMouseDown: (e) => {
+                e.stopPropagation();
               },
-              children: [
-                /* @__PURE__ */ jsx2(
-                  "div",
-                  {
-                    style: {
-                      fontFamily: "system-ui, -apple-system, sans-serif",
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: "white",
-                      marginBottom: 12
-                    },
-                    children: "Settings"
-                  }
-                ),
-                /* @__PURE__ */ jsxs("div", { style: { marginBottom: 12 }, children: [
-                  /* @__PURE__ */ jsx2(
-                    "label",
-                    {
-                      style: {
-                        fontFamily: "system-ui, -apple-system, sans-serif",
-                        fontSize: 11,
-                        fontWeight: 500,
-                        color: "rgba(255, 255, 255, 0.6)",
-                        marginBottom: 4,
-                        display: "block"
-                      },
-                      children: "Editor"
-                    }
-                  ),
-                  /* @__PURE__ */ jsxs(
-                    "select",
-                    {
-                      value: editorProtocol,
-                      onChange: (e) => onEditorChange(e.target.value),
-                      style: {
-                        fontFamily: "system-ui, -apple-system, sans-serif",
-                        fontSize: 12,
-                        padding: "6px 8px",
-                        borderRadius: 6,
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
-                        backgroundColor: "rgba(255, 255, 255, 0.1)",
-                        color: "white",
-                        cursor: "pointer",
-                        width: "100%",
-                        appearance: "none",
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 8px center",
-                        paddingRight: 28
-                      },
-                      children: [
-                        /* @__PURE__ */ jsx2("option", { value: "vscode", children: "VS Code" }),
-                        /* @__PURE__ */ jsx2("option", { value: "cursor", children: "Cursor" }),
-                        /* @__PURE__ */ jsx2("option", { value: "zed", children: "Zed" })
-                      ]
-                    }
-                  )
-                ] }),
-                /* @__PURE__ */ jsxs("div", { children: [
-                  /* @__PURE__ */ jsx2(
-                    "label",
-                    {
-                      style: {
-                        fontFamily: "system-ui, -apple-system, sans-serif",
-                        fontSize: 11,
-                        fontWeight: 500,
-                        color: "rgba(255, 255, 255, 0.6)",
-                        marginBottom: 4,
-                        display: "block"
-                      },
-                      children: "Modifier Keys"
-                    }
-                  ),
-                  /* @__PURE__ */ jsxs(
-                    "select",
-                    {
-                      value: modifierLocation,
-                      onChange: (e) => onModifierLocationChange(e.target.value),
-                      style: {
-                        fontFamily: "system-ui, -apple-system, sans-serif",
-                        fontSize: 12,
-                        padding: "6px 8px",
-                        borderRadius: 6,
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
-                        backgroundColor: "rgba(255, 255, 255, 0.1)",
-                        color: "white",
-                        cursor: "pointer",
-                        width: "100%",
-                        appearance: "none",
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 8px center",
-                        paddingRight: 28
-                      },
-                      children: [
-                        /* @__PURE__ */ jsx2("option", { value: "left", children: "Left side" }),
-                        /* @__PURE__ */ jsx2("option", { value: "right", children: "Right side" }),
-                        /* @__PURE__ */ jsx2("option", { value: "any", children: "Both sides" })
-                      ]
-                    }
-                  )
-                ] })
-              ]
+              style: {
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 22,
+                height: 22,
+                borderRadius: 10,
+                border: "none",
+                backgroundColor: "rgba(0, 0, 0, 0.85)",
+                backdropFilter: "blur(8px)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                cursor: "pointer",
+                pointerEvents: "auto",
+                color: "rgba(255, 255, 255, 0.6)"
+              },
+              title: "Settings",
+              children: /* @__PURE__ */ jsxs("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                /* @__PURE__ */ jsx2("circle", { cx: "12", cy: "12", r: "3" }),
+                /* @__PURE__ */ jsx2("path", { d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" })
+              ] })
             }
           )
-        ] })
-      ]
-    }
-  );
+        ]
+      }
+    )
+  ] });
 }
 function FullScreenCrosshairs({ x, y, mode, targetLevel }) {
   const color = getAccentColor(mode, targetLevel);
